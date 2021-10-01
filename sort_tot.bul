@@ -1,0 +1,27 @@
+%%% Input:  `cardinality_var[V,X]` and `cardinality_bound[V,C]` where `V` is a name, `X` is a variable occuring in the cardinality constraint, and `C` is the bound.
+%%% Output: clauses constraining  `var(X1)+var(X2)+... = C`.
+
+cardinality_var[V,X] :: #ground stot[V].
+cardinality_var[V,X] :: #ground set[V,X].
+
+stot_aux[V,I,I+1], order[V,X,I] :: var(X) -> var(stot(V,1,I)).
+stot_aux[V,I,I+1], order[V,X,I] :: var(X) <- var(stot(V,1,I)).
+stot_aux[V,I,K], order_range[V,J], J==(I+K+1)/2 :: #ground stot_aux[V,I,J].
+stot_aux[V,I,K], order_range[V,J], J==(I+K+1)/2 :: #ground stot_aux[V,J,K].
+
+stot_aux[V,I,K], J:=(I+K+1)/2, order_range[V,A], order_range[V,B], I <= A < J <= B < K, S:=A+B-J :: var(stot(V,J-I,A)) | var(stot(V,K-J,B)) <- var(stot(V,K-I,S+1)).
+stot_aux[V,I,K], J:=(I+K+1)/2, order_range[V,A], order_range[V,B], I <= A < J <= B < K, S:=A+B-J :: var(stot(V,J-I,A)) & var(stot(V,K-J,B)) -> var(stot(V,K-I,S)).
+stot_aux[V,I,K], J:=(I+K+1)/2, order_range[V,A], I <= A < J < K :: var(stot(V,J-I,A)) <- var(stot(V,K-I,A)).
+stot_aux[V,I,K], J:=(I+K+1)/2, order_range[V,A], I <= A < J < K :: var(stot(V,J-I,A)) -> var(stot(V,K-I,A+K-J)).
+stot_aux[V,I,K], J:=(I+K+1)/2, order_range[V,B], I < J <= B < K :: var(stot(V,K-J,B)) <- var(stot(V,K-I,B-J+I)).
+stot_aux[V,I,K], J:=(I+K+1)/2, order_range[V,B], I < J <= B < K :: var(stot(V,K-J,B)) -> var(stot(V,K-I,B)).
+
+stot[V], order_last[V,N] :: #ground stot_start[V,N+1].
+stot_start[V,K] :: #ground stot_aux[V,0,K].
+
+stot_aux[V,I,K], order_range[V,J], I <= J < K :: #exists[0] var(stot(V,K-I,J)).
+stot_aux[V,I,K], order_range[V,J], I <= J < K :: #hide var(stot(V,K-I,J)), ~var(stot(V,K-I,J)).
+
+% Uncomment line below to check for excact cardinality constraint (currently checks for at most)
+% stot_start[V,K], cardinality_bound[V,C], 0 <= C <  K :: ~var(stot(V,K,K-1-C)).
+stot_start[V,K], cardinality_bound[V,C], 0 <  C <= K ::  var(stot(V,K,K-C)).
