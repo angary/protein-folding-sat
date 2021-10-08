@@ -35,7 +35,7 @@ def solve(input_file: str, dimension: int) -> int:
     """
     # Double goal_contacts until it is unsolvable or it is larger than the
     # length of the sequence
-    goal_contacts = 2
+    goal_contacts = 1
     sequence_length = len(get_sequence(input_file))
     print(
         """
@@ -54,9 +54,9 @@ def solve(input_file: str, dimension: int) -> int:
     print()
 
     # Binary search to the maximum possible value that the 
-    lo = goal_contacts // 2
-    hi = goal_contacts
-    max_contacts = 0
+    max_contacts = goal_contacts // 2
+    lo = goal_contacts // 2 + 1
+    hi = goal_contacts - 1
     print(
         """
         ========================================================================
@@ -90,22 +90,16 @@ def solve_sat(input_file: str, goal_contacts: int, dimension: int) -> bool:
     """
     file_path = encode(input_file, goal_contacts, dimension)
 
-    os.system(f"bule2 --solve constraints.bul {file_path} sort_tot.bul order.bul > temp 2>&1")
-    solved = True
-    with open("temp", "r") as f:
-        output = f.read()
-        if "UNSAT" in output:
-            print("UNSAT")
-            solved = False
-        elif "SAT" in output:
-            print("SAT")
-            solved = True
-        else:
-            print("There was an error, not SAT or UNSAT")
-            os.remove("temp")
-            exit(1)
-    os.remove("temp")
-    return solved
+    command = f"bule2 --solve constraints.bul {file_path} sort_tot.bul order.bul"
+    result = subprocess.run(command.split(), capture_output=True)
+    output = str(result.stdout)
+    if "UNSAT" in output:
+        print("UNSAT")
+        return False
+    elif "SAT" in output:
+        print("SAT")
+        return True
+    print("There was a bug in solving with bule")
 
 
 def encode(input_file: str, goal_contacts: int, dimension: int) -> str:
@@ -116,7 +110,7 @@ def encode(input_file: str, goal_contacts: int, dimension: int) -> str:
     file_name = input_file.split("/")[1]
 
     sequence = get_sequence(input_file)
-    base_goal = get_adjacent_ones(sequence) * 2
+    base_goal = get_adjacent_ones(sequence)
     n = len(sequence)
     w = get_grid_diameter(dimension, n)
     
@@ -141,7 +135,7 @@ def encode(input_file: str, goal_contacts: int, dimension: int) -> str:
 
         # Write goal contacts
         f.write("% Goal contacts\n")
-        f.write(f"#ground goal[{base_goal + goal_contacts}].\n")
+        f.write(f"#ground goal[{(base_goal + goal_contacts)}].\n")
         f.write("\n")
 
     return f"models/{file_name}.bul"
