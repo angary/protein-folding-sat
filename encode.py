@@ -2,11 +2,12 @@
 # 2D only so far
 
 import argparse
-import math
-import os
 import subprocess
-import sys
+import time
 
+from numpy import datetime64
+
+TEST_REPEATS = 5
 
 def main() -> None:
     """
@@ -16,14 +17,37 @@ def main() -> None:
     input_file = args.input_file
     goal_contacts = args.contacts
     dimension = args.dimension
-    if args.solve:
+
+    if args.solve and args.time:
+        print("Attempting to time and solve\n")
+        time(input_file, dimension)
+    elif args.solve:
         print("Attempting to solve\n")
         max_contacts = solve(input_file, dimension)
         print(f"Max contacts: {max_contacts}")
-    else:
+    elif not args.solve and not args.time:
         print("Attempting to encode\n")
         file_path = encode(input_file, goal_contacts, dimension)
         print(f"Encoding: {file_path}")
+    else:
+        print("Error with options")
+    return
+
+
+def time(input_file: str, dimension: int) -> None:
+    """
+    Time how long it takes to solve a contact and write it into a file
+    """
+    length = len(get_sequence(input_file))
+    with open(f"results/{input_file}.csv", "w+") as f:
+        f.write("length,time,contacts\n")
+    for _ in range(TEST_REPEATS):
+        start = time.time()
+        max_contacts = solve(input_file, dimension)
+        end = time.time()
+        duration = end - start
+        with open(f"results/{input_file}.csv", "a") as f:
+            f.write(f"{length},{duration},{max_contacts}\n")
     return
 
 
@@ -223,6 +247,12 @@ def parse_args() -> argparse.Namespace:
         "--solve",
         action="store_true",
         help="solve for the maximum number of contacts"
+    )
+    parser.add_argument(
+        "-t",
+        "--time",
+        action="store_true",
+        help="record the time taken to solve"
     )
     return parser.parse_args()
 
