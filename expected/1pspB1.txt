@@ -1,0 +1,20 @@
+Maximum contacts found for 010010 using Lingeling: 1
+Lingeling time taken: 0.22819972038269043
+Lingeling runs required: 2
+Maximum contacts found for 010010 using gurobi: 1
+Gurobi time taken: 0.09306192398071289
+Maximum contacts found for 010010 using Lingeling: 1
+Lingeling time taken: 0.22744178771972656
+Lingeling runs required: 2
+Maximum contacts found for 010010 using gurobi: 1
+Gurobi time taken: 0.09330415725708008
+Maximum contacts found for 010010 using Lingeling: 1
+Lingeling time taken: 0.22327423095703125
+Lingeling runs required: 2
+Maximum contacts found for 010010 using gurobi: 1
+Gurobi time taken: 0.09342408180236816
+Maximum contacts found for 010010 using Lingeling: 1
+Lingeling time taken: 0.22263073921203613
+Lingeling runs required: 2
+Maximum contacts found for 010010 using gurobi: 1
+Gurobi time taken: 0.09393787384033203

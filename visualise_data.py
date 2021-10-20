@@ -1,3 +1,5 @@
+# Plot the runtime results for the encodings
+
 import csv
 import matplotlib.pyplot as plt
 import os
@@ -10,9 +12,8 @@ def main():
             continue
         with open(os.path.join(dirpath, filepath)) as f:
             content = f.readlines()
-            rows = content[1:]
-            csvreader = csv.reader(rows)
-            for row in csvreader:
+            rows = csv.reader(content[1:])
+            for row in rows:
                 length = row[0]
                 time = float(row[1])
                 if length not in results:
@@ -38,6 +39,7 @@ def main():
     plt.plot(names, values, marker="o", label="Original encoding")
     plt.grid(True, which="minor")
     plt.xlabel("Sequence length")
+    plt.xticks(names)
     plt.ylabel("Time(s)")
     plt.yscale("log")
     plt.legend()

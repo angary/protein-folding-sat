@@ -1,0 +1,12 @@
+
+Maximum contacts found for 001110101111111111101 using Lingeling: 10
+Lingeling time taken: 79.55092763900757
+Lingeling runs required: 8
+Maximum contacts found for 001110101111111111101 using gurobi: 10
+Gurobi time taken: 3.0850090980529785
+
+Maximum contacts found for 001110101111111111101 using Lingeling: 10
+pLingeling time taken: 30.94362735748291
+pLingeling runs required: 8
+Maximum contacts found for 001110101111111111101 using gurobi: 10
+Gurobi time taken: 3.446012258529663

@@ -144,7 +144,7 @@ cython_debug/
 
 # Practise and temp files
 practise/
-temp
+temp*
 
 # Produced Binary Sequences
 models/*

@@ -23,16 +23,16 @@ The objective of this project is to examine the HP Model of protein folding unde
 
 ### Files
 
-| File                    | Purpose                                                                                                                   |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| gen_random_sequence.py  | Writes to a file a random string of "0"s and "1"s                                                                         |
-| get_sequences.py        | Reads in the data from the `Dataset` folder and generates file containing "0"s and "1s"                                   |
-| encode.py               | Generates bule2 encoding for a protein. If given the `--solve` flag, finds the max num of contacts through binary search. |
-| constraints.bul         | Bule2 encoding of the prototein problem                                                                                   |
-| order.bul, sort_tot.bul | Bule2 encoding of the linear constraints by Olivier Bailleux and Yacine Boufkhad                                          |
+| File                                         | Purpose                                                                                                                   |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| [gen_rand_sequence.py](gen_rand_sequence.py) | Writes to a file a random string of "0"s and "1"s                                                                         |
+| [get_sequences.py](get_sequences.py)         | Reads in the data from the `Dataset` folder and generates file containing "0"s and "1s"                                   |
+| [encode.py](encode.py)                       | Generates bule2 encoding for a protein. If given the `--solve` flag, finds the max num of contacts through binary search. |
+| [validate.py](validate.py)                   | Compares the output results with the expected results.                                                                    |
+| [constraints.bul](bule/constraints.bul)      | Bule2 encoding of the prototein problem                                                                                   |
 
 Note that a temporary file called `temp` is created / overwritten to hold the output of running the SAT solver, so avoid creating your own files called temp to hold information (`os.system` is used rather than something like `subprocess.run` as the latter seems to have worse performance).
 
-The project uses the [Bule SAT programming language](https://github.com/vale1410/bule).
+The project uses the [Bule SAT programming language](https://github.com/vale1410/bule) for generating the encodings, and [kissat](https://github.com/arminbiere/kissat) for solving the encodings.
 
 Some testing files are modified versions of files found [here](https://github.com/hannah-aught/prototein-problem).

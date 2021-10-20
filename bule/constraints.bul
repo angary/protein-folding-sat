@@ -16,13 +16,13 @@ coordinate[I], nextCoordinate[J, K]:: #ground adjacent[c(J, I), c(K, I)].
 % If x(i, j) is true, then the character at position i in the sequence is 
 % assigned to point j in the grid
 sequence[I, B], grid[G]:: #exists[0] x(I, G).
-% sequence[I, B], grid[G]:: #hide ~x(I, G).
+sequence[I, B], grid[G]:: #hide ~x(I, G).
 
 % Every character in the sequence is assigned to some point in G
 sequence[I, B]:: grid[G]: x(I, G).
 
 % No character-position in the sequence can be assigned to more than one point
-sequence[I, B], grid[G1], grid[G2], G1 != G2:: ~x(I, G1) | ~x(I, G2).
+sequence[I, B], grid[G1], grid[G2], G1 < G2:: ~x(I, G1) | ~x(I, G2).
 % sequence[I, B], coordinate[X1], coordinate[Y1], coordinate[X2], coordinate[Y2], width[W], X1 * W + Y1 < X2 * W + Y2:: ~x(I, c(X1, Y1)) | ~x(I, c(X2, Y2)).
 
 % No point in the grid can have more than one character-position assigned to it
@@ -35,48 +35,42 @@ sequence[I, B1], sequence[I + 1, B2], grid[G1]:: ~x(I, G1) | adjacent[G1, G2]: x
 % Identifying Potential Contacts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 grid[G]:: #exists[0] isOne(G).
-% grid[G]:: #hide ~isOne(G).
-
-% A G, A I, (x(I, G) and sequence(I, 1)) -> T(G)
-% A G, A I, (x(I, G) and sequence(I, 0)) -> ~T(G)
-% A G, A I, ~x(I, G) -> ~T(G)
+grid[G]:: #hide ~isOne(G).
 
 % -> can only be used for clauses, where hypothesis is conjunciton and conclusion is disjunction
-grid[G], sequence[I, 1]:: x(I, G) -> isOne(G).
-grid[G], sequence[I, 0]:: x(I, G) -> ~isOne(G).
-grid[G]:: sequence[I, B]: x(I, G) | ~isOne(G). % For all I, G if x(I, G) is false -> t(G) has to be false
+grid[G], sequence[I, 1]:: ~x(I, G) | isOne(G).
+grid[G]:: sequence[I, 1]: x(I, G) | ~isOne(G).
+% grid[G], sequence[I, 0]:: x(I, G) -> ~isOne(G).
+% grid[G]:: sequence[I, B]: x(I, G) | ~isOne(G). % For all I, G if x(I, G) is false -> t(G) has to be false
 
 % c(G1, G2) is true iff "1" is assigned to t(G1) and t(G2)
 adjacent[G1, G2]:: #exists[0] var(contact(G1, G2)).
-% adjacent[G1, G2]:: #hide ~var(contact(G1, G2)).
+adjacent[G1, G2]:: #hide ~var(contact(G1, G2)).
 
 % If two adjacent points are "1" then there is a contact
-adjacent[G1, G2]:: ~var(contact(G1, G2)) | isOne(G1).
+adjacent[G1, G2]:: ~var(contact(G1, G2)) | isOne(G1) .
 adjacent[G1, G2]:: ~var(contact(G1, G2)) | isOne(G2).
 adjacent[G1, G2]:: var(contact(G1, G2)) | ~isOne(G1) | ~isOne(G2).
 
 % Counting Potential Contacts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%% Input:  `cardinality_var[V,X]` and `cardinality_bound[V,C]` where `V` is a name, `X` is a variable occuring in the cardinality constraint, and `C` is the bound.
-
-% if r of x then cardinality bound of (0, x)
-% we want to count the number of ~countact(G1, G2)
-
-% r = Dimension * |G| - (goal contacts)
-% goal contacts = dimemsion * |G| - r
-% r[C], width[W]:: #ground goal[2 * W * W - C].
-
 % We are going to count contact(G1, G2) for every adjacent
 % Total number of contacts should be C
 adjacent[G1, G2]:: #ground cardinality_var[0, contact(G1, G2)].
 goal[C]:: #ground cardinality_bound[0, C].
 
+% 2D
+% vertical = n * (m - 1)
+% horizontal = (n - 1) * m
+% total = vertical + horizontal = n * (m - 1) + (n - 1) * m = 2nm - n - m
 
-% Add a filter / extra constraint
-% Total number of contracts involve c(0, 0) on LHS should be 0
-% adjacent[c(0, 0), G2]:: #ground cardinality_var[stuff, contact(c(0, 0), G2)].
-% #ground cardinality_bound[stuff, 2].
+% Rather than counting number of adjacent grid cells
+% We go through all cells where the sequence is and then check its adjacent cells
 
-% goal[C]:: #exists[0] g(C), debug.
-% goal[C]:: g(C) | debug.
+% Point A at (1, 1) -> (0, 1), (1, 0), (1, 2), (2, 1)
+% 
+%
+%
+% l^2 / 4
+

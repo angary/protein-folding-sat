@@ -1,0 +1,5 @@
+
+Maximum contacts found for 10011101101111100010101010000 using Lingeling: 10
+plingeling time taken: 517.2148146629333
+plingeling runs required: 8
+Gurobi still working w/ 20k+ seconds already done
