@@ -157,4 +157,5 @@ input/*
 # Dataset folder from zip
 Dataset/
 
-
+# Ignore results for now
+results/*

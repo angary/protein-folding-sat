@@ -52,8 +52,8 @@ cca_start[V,K] :: #ground cca_aux[V,0,K].
 
 cca_aux[V,I,K], K > 0, order_range[V,J], 0 <= J <= K-1 :: #exists[0] var(cca(V,z,I+J,K)).
 cca_aux[V,I,K], K > 0, order_range[V,J], 0 <= J <= K-1 :: #exists[0] var(cca(V,c,I+J,K)).
-cca_aux[V,I,K], K > 0, order_range[V,J], 0 <= J <= K-1 :: #hide var(cca(V,z,I+J,K)).
-cca_aux[V,I,K], K > 0, order_range[V,J], 0 <= J <= K-1 :: #hide var(cca(V,c,I+J,K)).
+cca_aux[V,I,K], K > 0, order_range[V,J], 0 <= J <= K-1 :: #hide var(cca(V,z,I+J,K)), ~var(cca(V,z,I+J,K)).
+cca_aux[V,I,K], K > 0, order_range[V,J], 0 <= J <= K-1 :: #hide var(cca(V,c,I+J,K)), ~var(cca(V,c,I+J,K)).
 
 cca_start[V,K], order_range[V,I], I <= K-1,  bitSet[cca(V),I] ::  var(cca(V,z,I,K)).
 cca_start[V,K], order_range[V,I], I <= K-1, ~bitSet[cca(V),I] :: ~var(cca(V,z,I,K)).

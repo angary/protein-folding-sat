@@ -5,10 +5,7 @@ import argparse
 import subprocess
 import time
 
-from run_tests import INPUT_DIR
-
-
-TEST_REPEATS = 3
+TEST_REPEATS = 1
 
 def main():
     """
@@ -18,17 +15,18 @@ def main():
     input_file = args.input_file
     goal_contacts = args.contacts
     dimension = args.dimension
+    new = args.new
 
     if args.solve and args.time:
         print("Attempting to time and solve\n")
-        timed_solve(input_file, dimension)
+        timed_solve(input_file, dimension, new)
     elif args.solve:
         print("Attempting to solve\n")
-        max_contacts = solve(input_file, dimension)
+        max_contacts = solve(input_file, dimension, new)
         print(f"Max contacts: {max_contacts}")
     elif not args.solve and not args.time:
         print("Attempting to encode\n")
-        file_path = encode(input_file, goal_contacts, dimension)
+        file_path = encode(input_file, goal_contacts, dimension, new)
         print(f"Encoding bul    : {file_path.replace('cnf', 'bul')}")
         print(f"Encoding kissat : {file_path}")
     else:
@@ -36,24 +34,30 @@ def main():
     return
 
 
-def timed_solve(input_file: str, dimension: int):
+def timed_solve(input_file: str, dimension: int, new: bool):
     """
     Time how long it takes to solve a contact and write it into a file
     """
     length = len(get_sequence(input_file))
     filename = input_file.split("/")[-1]
-    with open(f"results/{input_file}.csv", "w+") as f:
+    encoding_type = "new" if new else "old"
+    results_file = f"results/{filename}_{dimension}d_{encoding_type}.csv"
+
+    with open(results_file, "w+") as f:
         f.write("length,time,contacts\n")
+
     for _ in range(TEST_REPEATS):
-        result = solve(input_file, dimension)
+        result = solve(input_file, dimension, new)
         max_contacts = result["max_contacts"]
         duration = result["duration"]
-        with open(f"results/{input_file}.csv", "a") as f:
+        print(results_file)
+
+        with open(results_file, "a") as f:
             f.write(f"{length},{duration},{max_contacts}\n")
     return
 
 
-def solve(input_file: str, dimension: int):
+def solve(input_file: str, dimension: int, new: bool):
     """
     Start the goal contacts at 1 and then attempt to solve it, doubling the
     goal contacts until it is unsolvable. Then binary search for the largest
@@ -73,7 +77,7 @@ def solve(input_file: str, dimension: int):
     )
     while goal_contacts < sequence_length:
         print(f"Solving {goal_contacts}: ", end="", flush=True)
-        duration = solve_sat(input_file, goal_contacts, dimension)
+        duration = solve_sat(input_file, goal_contacts, dimension, new)
         total_duration += abs(duration)
         solved = duration > 0
         if not solved:
@@ -99,7 +103,7 @@ def solve(input_file: str, dimension: int):
 
         # Attempt to solve
         print(f"Solving {goal_contacts}:", end=" ")
-        duration = solve_sat(input_file, goal_contacts, dimension)
+        duration = solve_sat(input_file, goal_contacts, dimension, new)
         total_duration += abs(duration)
         solved = duration > 0
         print(solved)
@@ -117,18 +121,17 @@ def solve(input_file: str, dimension: int):
     }
 
 
-def solve_sat(input_file: str, goal_contacts: int, dimension: int):
+def solve_sat(input_file: str, goal_contacts: int, dimension: int, new: bool):
     """
     Run an encoding of the input file, with the target goal of contacts and
     return the duration for solving if it managed
     """
-    file_path = encode(input_file, goal_contacts, dimension)
+    file_path = encode(input_file, goal_contacts, dimension, new)
     command = f"kissat {file_path} -q"
     start = time.time()
     result = subprocess.run(command.split(), capture_output=True)
     duration = time.time() - start
     output = str(result.stdout)
-    # print(f"{output = }")
     if "UNSAT" in output:
         print("UNSAT")
         return -duration
@@ -138,17 +141,18 @@ def solve_sat(input_file: str, goal_contacts: int, dimension: int):
     print("There was a bug in solving with bule")
 
 
-def encode(input_file: str, goal_contacts: int, dimension: int):
+def encode(input_file: str, goal_contacts: int, dimension: int, new: bool):
     """
     Generate bule encoding for a protein sequence and write it to a file in
     the models folder, returning the path to the file
     """
-    file_name = input_file.split("/")[1]
+    file_name = input_file.split("/")[-1]
 
     sequence = get_sequence(input_file)
     base_goal = get_adjacent_ones(sequence)
     n = len(sequence)
     w = get_grid_diameter(dimension, n)
+    encoding_version = "new" if new else "old"
     
     # Number of contacts = adjacent "1"s minus offset
     with open(f"models/{file_name}.bul", "w+") as f:
@@ -176,7 +180,7 @@ def encode(input_file: str, goal_contacts: int, dimension: int):
         f.write("\n")
 
     bule_files_list = [
-        "bule/constraints.bul",
+        f"bule/constraints_{dimension}d_{encoding_version}.bul",
         "bule/cc_a.bul"
     ]
 
@@ -184,7 +188,6 @@ def encode(input_file: str, goal_contacts: int, dimension: int):
     in_file = f"models/{file_name}.bul"
     out_file = f"models/{file_name}.cnf"
     command = f"bule2 --output dimacs {bule_files} {in_file} > {out_file}"
-    # command = f"bule2 --output qdimacs {bule_files} {in_file} | sed '2d' > {out_file}"
     # command = f"bule2 --output qdimacs {bule_files} {in_file} | sed '2d' > {out_file}"
     # command = f"bule2 {bule_files} {in_file} | grep -v exists > {out_file}"
     # bule2 --solve true --solver kissat  bule/constraints.bul bule/sort_tot.bul bule/order.bul models/gen_length_6_1.bul
@@ -232,18 +235,6 @@ def get_grid_diameter(dimension: int, n: int):
     return w
 
 
-def find_offset(sequence: str):
-    """
-    Return the number of adjacent "1"s in the sequence
-    """
-    n = len(sequence)
-    count = 0
-    for i in range(n - 1):
-        if sequence[i] == "1" and sequence[i] == sequence[i + 1]:
-            count += 1
-    return count
-
-
 def parse_args():
     """
     Parse command line arguments
@@ -268,6 +259,7 @@ def parse_args():
         nargs="?",
         type=int,
         default=2,
+        choices={2, 3},
         help="the dimension of the embedding grid, default value: 2"
     )
     parser.add_argument(
@@ -281,6 +273,12 @@ def parse_args():
         "--time",
         action="store_true",
         help="record the time taken to solve"
+    )
+    parser.add_argument(
+        "-n",
+        "--new",
+        action="store_true",
+        help="use the new encoding"
     )
     return parser.parse_args()
 

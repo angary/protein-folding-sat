@@ -1,7 +1,5 @@
 # Protein Folding through Logical Encodings
 
-Repository for my Taste of Research project.
-
 ## Description of field of Research
 
 Protein Folding is a notoriously difficult task from computational biology.
@@ -29,10 +27,7 @@ The objective of this project is to examine the HP Model of protein folding unde
 | [get_sequences.py](get_sequences.py)         | Reads in the data from the `Dataset` folder and generates file containing "0"s and "1s"                                   |
 | [encode.py](encode.py)                       | Generates bule2 encoding for a protein. If given the `--solve` flag, finds the max num of contacts through binary search. |
 | [validate.py](validate.py)                   | Compares the output results with the expected results.                                                                    |
-| [constraints.bul](bule/constraints.bul)      | Bule2 encoding of the prototein problem                                                                                   |
-
-Note that a temporary file called `temp` is created / overwritten to hold the output of running the SAT solver, so avoid creating your own files called temp to hold information (`os.system` is used rather than something like `subprocess.run` as the latter seems to have worse performance).
 
 The project uses the [Bule SAT programming language](https://github.com/vale1410/bule) for generating the encodings, and [kissat](https://github.com/arminbiere/kissat) for solving the encodings.
 
-Some testing files are modified versions of files found [here](https://github.com/hannah-aught/prototein-problem).
+The GitHub repository from the original research paper can be found [here](https://github.com/hannah-aught/prototein-problem).
