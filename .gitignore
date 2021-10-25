@@ -141,6 +141,8 @@ cython_debug/
 
 # System
 .DS_Store
+.vscode/
+.idea/
 
 # Practise and temp files
 practise/

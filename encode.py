@@ -7,6 +7,7 @@ import time
 
 TEST_REPEATS = 1
 
+
 def main():
     """
     Extract arguments and determine whether to perform an encoding or solve
@@ -158,8 +159,7 @@ def encode(input_file: str, goal_contacts: int, dimension: int, new: bool):
     with open(f"models/{file_name}.bul", "w+") as f:
 
         # Write sequence string
-        f.write(f"% {sequence}\n")
-        f.write("\n")
+        f.write(f"% {sequence}\n\n")
 
         # Write logical encoding of sequence
         f.write(f"% sequence\n")
@@ -170,14 +170,12 @@ def encode(input_file: str, goal_contacts: int, dimension: int, new: bool):
 
         # Write width
         f.write("% width\n")
-        f.write(f"#ground width[{w}].\n")
-        f.write("\n")
+        f.write(f"#ground width[{w}].\n\n")
 
         # Write goal contacts
         f.write(f"% Base contacts {base_goal}\n")
         f.write(f"% Goal contacts {goal_contacts}\n")
-        f.write(f"#ground goal[{(base_goal + goal_contacts)}].\n")
-        f.write("\n")
+        f.write(f"#ground goal[{(base_goal + goal_contacts)}].\n\n")
 
     bule_files_list = [
         f"bule/constraints_{dimension}d_{encoding_version}.bul",
@@ -190,7 +188,7 @@ def encode(input_file: str, goal_contacts: int, dimension: int, new: bool):
     command = f"bule2 --output dimacs {bule_files} {in_file} > {out_file}"
     # command = f"bule2 --output qdimacs {bule_files} {in_file} | sed '2d' > {out_file}"
     # command = f"bule2 {bule_files} {in_file} | grep -v exists > {out_file}"
-    # bule2 --solve true --solver kissat  bule/constraints.bul bule/sort_tot.bul bule/order.bul models/gen_length_6_1.bul
+    # bule2 --solve true --solver kissat  bule/constraints_2d_old.bul bule/s_tot.bul models/gen_length_6_1.bul
     subprocess.run(command, shell=True)
     print(out_file)
     return out_file
@@ -200,9 +198,8 @@ def get_sequence(input_file: str):
     """
     Read the input file and return the string sequence of 1s and 0s
     """
-    sequence = ""
     with open(input_file, "r") as f:
-        sequence = f.readline()[:-1] # Ignore last "\n"
+        sequence = f.readline()[:-1]  # Ignore last "\n"
     return sequence
 
 
@@ -221,7 +218,6 @@ def get_grid_diameter(dimension: int, n: int):
     """
     Return ideal grid diameter, given the dimension and protein length
     """
-    w = 0
     if dimension == 2:
         if n >= 12:
             w = 1 + n // 4

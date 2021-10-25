@@ -45,6 +45,8 @@ def main():
         data = []
         for key in results:
             result = results[key]
+            if result["count"] == 0:
+                continue
             result["total_time"] /= result["count"]
             data.append((int(key), result["total_time"]))
         all_data.append(data)
@@ -57,12 +59,13 @@ def main():
     names = [x[0] for x in all_data[OLD_2D]]
     values = [x[1] for x in all_data[OLD_2D]]
     plt.plot(names, values, marker="o", label="Original 2d encoding")
+    plt.grid(True, which="minor")
 
     names = [x[0] for x in all_data[OLD_3D]]
     values = [x[1] for x in all_data[OLD_3D]]
     plt.plot(names, values, marker="o", label="Original 3d encoding")
+    # plt.grid(True, which="minor")
 
-    plt.grid(True, which="minor")
     plt.xlabel("Sequence length")
     plt.xticks(names)
     plt.ylabel("Time(s)")
