@@ -11,25 +11,28 @@ def main1():
             if start == 0:
                 print("new already converted")
                 return
-            if "s" in line:
-                end = line.index("s") - 1
-            else:
-                end = len(line) - 1
-            extra = line[end:]
-            line = line[start:end]
-            vars = line.split()
+            # if "n" in line:
+            #     end = line.index("n") - 1
+            # else:
+            #     end = len(line) - 1
+            # extra = line[end:].rstrip("\n")
+            line = line[start:].split()
+            xs = [val for val in line if val.startswith("x")]
             result = []
-            for j in range(0, len(vars), 2):
+            for j in range(0, len(xs), 2):
                 # a is the var of the lower dimension
-                a = vars[j]
-                b = vars[j + 1]
+                a = xs[j]
+                b = xs[j + 1]
                 if a[-2] > b[-2]:
                     a, b = b, a
                 point = a[2]
                 x = a[4]
                 y = b[4]
                 result.append(f"x({point},c({x},{y}))")
+            
+            extras = " ".join(line[len(xs):])
             results.append("  ".join(result) + "\n")
+            # results.append("  ".join(result) + " " + extras + "\n")
     results.sort()
     for result in results:
         print(result)

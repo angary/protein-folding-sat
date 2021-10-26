@@ -19,78 +19,63 @@ sequence[I, B], dim[D] :: pos[P] : x(I, P, D).  % TODO: Have new encoding for at
 sequence[I, B], dim[D], pos[P], pos[Q], P < Q :: ~x(I, P, D) | ~x(I, Q, D).
 
 % No point in the grid can have more than one character-position assigned to it AKA two sequences cannot be on the same point
-sequence[I, B], sequence[J, C], I + 1 < J :: #ground different[I, J].
-sequence[I, B], sequence[I + 1, C] :: #ground internalSeq[I].
+sequence[I, B], sequence[J, C], I < J :: #ground different[I, J]. 
 different[I, J], dim[D] :: #exists[0] same(I, J, D).
-internalSeq[I], dim[D] :: #exists[0] static(I, D). % is the opposite of direction
-different[I, J], dim[D] :: #hide ~same(I, J, D), same(I, J, D).
+different[I, J], dim[D] :: #hide ~same(I, J, D).
 different[I, J], dim[D], pos[P] ::  x(I, P, D) &  x(J, P, D) ->  same(I, J, D).
-internalSeq[I], dim[D], pos[P] ::  x(I, P, D) &  x(I + 1, P, D) ->  static(I, D).
 different[I, J], dim[D], pos[P] :: ~x(I, P, D) &  x(J, P, D) -> ~same(I, J, D).
 different[I, J], dim[D], pos[P] ::  x(I, P, D) & ~x(J, P, D) -> ~same(I, J, D).
-% different[I, J], dim[D], pos[P] :: same(I, J, D) | ~x(I, P, D) | ~x(J, P, D).
-% different[I, J], dim[D], pos[P] :: same(I, J, D) | ~x(I, P, D) | pos[P2], P != P2 : x(J, P2, D). % If I is at P, then it is notthere in D, any J should be in diff position
-different[I, J] :: dim[D] : ~same(I, J, D). % I and J cannot have the same position for all dimensions
-% sequence[I, B], sequence[J, C], dim[D], I < J, pos[P] :: ~x(I, P, D) & ~x(J, P, D) -> ~same(I, J, D).
-% sequence[I, B], sequence[J, C], dim[D], I < J, pos[P] ::  x(I, P, D) |  x(J, P, D) <-  same(I, J, D).
+different[I, J], dim[D], pos[P] ::  x(I, P, D) & ~x(J, P, D) -> ~same(I, J, D).
+different[I, J] :: dim[D] : ~same(I, J, D).
 
 % Every adjacent pair of character positions must be placed on adjacent points in the grid
-% direction(I, I + 1, D) == I, and I + 1 are one position apart in the grid in dimension D
-% I and I + 1 has to be different in at least one dimension
-% If I and I + 1 is different in one dimension, it has to be same in the others
-% If it is the same in one dimension, it cannot be direction in the same dimension
-
-% Can also have a `direction(sequenceI, polarityP, dimensionD)`
-internalSeq[I], dim[D] :: #exists[0] direction(I, D).
-internalSeq[I], dim[D] :: #hide ~direction(I, D), direction(I, D).
-internalSeq[I], dim[D], pos[P], pos[P + 1] ::  x(I, P, D) &  x(I + 1, P + 1, D) ->  direction(I, D).
-internalSeq[I], dim[D], pos[P], pos[P - 1] ::  x(I, P, D) &  x(I + 1, P - 1, D) ->  direction(I, D).
-
-internalSeq[I], dim[D], pos[P],  pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(I + 1, P + 1, D) & ~x(I + 1, P - 1, D) -> ~direction(I, D).
-internalSeq[I], dim[D], pos[P],  pos[P + 1], ~pos[P - 1] ::  x(I, P, D) & ~x(I + 1, P + 1, D) -> ~direction(I, D).
-internalSeq[I], dim[D], pos[P], ~pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(I + 1, P - 1, D) -> ~direction(I, D).
-
-internalSeq[I] :: dim[D] : direction(I, D). % I and I + 1 has to be different in at least one dimension
-internalSeq[I], dim[D1], dim[D2], D1 != D2 :: direction(I, D1) -> static(I, D2). % If it is different in one dimension, it has to be same in the others
-internalSeq[I], dim[D] :: static(I, D) -> ~direction(I, D). % If it is the same in one dimension, it cannot be direction in the same dimension
-
-% sequence[I, B], sequence[I + 1, C], dim[D] :: #exists[0] direction(I, I + 1, D).
-% sequence[I, B], sequence[I + 1, C], dim[D], pos[P] ::  x(I, P, D) &  x(I + 1, P, D) ->  direction(I, I + 1, D).
-% sequence[I, B], sequence[I + 1, C],dim[D], pos[P] :: ~x(I, P, D) &  x(I + 1, P, D) -> ~direction(I, I + 1, D).
-% sequence[I, B], sequence[I + 1, C], dim[D], pos[P] ::  x(I, P, D) & ~x(I + 1, P, D) -> ~direction(I, I + 1, D).
-% For all sequences, if it is the direction in one dimension
-% Then it cannot be direction in another dimension, then it has to be the same in other dimensions
-% sequence[I, B], sequence[I + 1, C], dim[D1] :: direction(I, I + 1, D1) -> dim[D2], D1 != D2 : ~direction(I, I + 1, D2).
-
-% sequence[I, B1], sequence[I + 1, B2], pos[P], pos[P + 1], dim[D]:: ~x(I, P, D) | ~x(I + 1, P + 1, D).
-% sequence[I, B1], sequence[I + 1, B2], pos[P], pos[P - 1], dim[D]:: ~x(I, P, D) | ~x(I + 1, P + 1, D).
-% sequence[I, B1], sequence[I + 1, B2], grid[G1] :: ~x(I, G1) | directionacent[G1, G2] : x(I + 1, G2) | directionacent[G3, G1] : x(I + 1, G3).
-
+sequence[I, B], sequence[I + 1, C], dim[D] :: #ground adj[I, I + 1].
+adj[I, J], dim[D] :: #exists[0] direction(I, J, D).
+adj[I, J], dim[D] :: #hide direction(I, J, D),  ~direction(I, J, D).
+adj[I, J], dim[D], pos[P],  pos[P + 1] ::  x(I, P, D) &  x(J, P + 1, D) ->  direction(I, J, D).
+adj[I, J], dim[D], pos[P],  pos[P - 1] ::  x(I, P, D) &  x(J, P - 1, D) ->  direction(I, J, D).
+adj[I, J], dim[D], pos[P],  pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) & ~x(J, P - 1, D) -> ~direction(I, J, D).
+adj[I, J], dim[D], pos[P],  pos[P + 1], ~pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) -> ~direction(I, J, D).
+adj[I, J], dim[D], pos[P], ~pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P - 1, D) -> ~direction(I, J, D).
+adj[I, J] :: dim[D] : direction(I, J, D). % I and I + 1 has to be different in at least one dimension
+adj[I, J], dim[D1], dim[D2], D1 != D2 :: direction(I, J, D1) -> same(I, J, D2). % If it is different in one dimension, it has to be same in the others
+adj[I, J], dim[D] :: same(I, I + 1, D) -> ~direction(I, J, D). % If it is the same in one dimension, it cannot be direction in the same dimension
+% % Can also have a `direction(sequenceI, polarityP, dimensionD)`
 
 % % Identifying Potential Contacts
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% grid[G] :: #exists[0] isOne(G).
-% % grid[G] :: #hide ~isOne(G).
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% sequence[I, 1], sequence[J, 1], I + 1 < J :: #ground nonAdjOne[I, J].
+% sequence[I, 1], sequence[J, 1], I + 1 < J, dim[D] :: #exists[0] next(I, J, D).
+% sequence[I, 1], sequence[J, 1], I + 1 < J, dim[D] :: #hide ~next(I, J, D).
 
-% % -> can only be used for clauses, where hypothesis is conjunciton and conclusion is disjunction
-% grid[G], sequence[I, 1] :: ~x(I, G) | isOne(G).
-% grid[G] :: sequence[I, 1] : x(I, G) | ~isOne(G).
-% % grid[G], sequence[I, 0] :: x(I, G) -> ~isOne(G).
-% % grid[G] :: sequence[I, B] : x(I, G) | ~isOne(G). % For all I, G if x(I, G) is false -> t(G) has to be false
+% % If I and J are adjacent in one dir and not the others, they are next to each other
+% nonAdjOne[I, J], dim[D], pos[P], pos[P + 1] :: x(I, P, D) & x(J, P + 1, D) -> next(I, J, D).
+% nonAdjOne[I, J], dim[D], pos[P], pos[P - 1] :: x(I, P, D) & x(J, P - 1, D) -> next(I, J, D).
+% nonAdjOne[I, J], dim[D], pos[P],  pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) & ~x(J, P - 1, D) -> ~next(I, J, D).
+% nonAdjOne[I, J], dim[D], pos[P],  pos[P + 1], ~pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) -> ~next(I, J, D).
+% nonAdjOne[I, J], dim[D], pos[P], ~pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P - 1, D) -> ~next(I, J, D).
 
-% % c(G1, G2) is true iff "1" is assigned to t(G1) and t(G2)
-% directionacent[G1, G2] :: #exists[0] var(contact(G1, G2)).
-% % directionacent[G1, G2] :: #hide ~var(contact(G1, G2)).
+% % If I and J are next to each other then there is a contact
+% sequence[I, 1], sequence[J, 1], I + 1 < J :: #exists[0] var(contact(I, J)).
+% sequence[I, 1], sequence[J, 1], I + 1 < J :: #hide ~var(contact(I, J)).
+% nonAdjOne[I, J], dim[D1] :: next(I, J, D1) & dim[D2], D1 != D2 : same(I, J, D2) -> var(contact(I, J)).
+% nonAdjOne[I, J], dim[D1], dim[D2], D1 != D2 :: next(I, J, D1) & ~same(I, J, D2) -> ~var(contact(I, J)).
+% nonAdjOne[I, J], dim[D1], dim[D2], D1 != D2 :: ~same(I, J, D1) & ~next(I, J, D1) & same(I, J, D2) -> ~var(contact(I, J)).
+% nonAdjOne[I, J], dim[D1], dim[D2], D1 != D2 :: ~same(I, J, D1) & ~next(I, J, D2) & same(I, J, D2) -> ~var(contact(I, J)).
 
-% % If two directionacent points are "1" then there is a contact
-% directionacent[G1, G2] :: ~var(contact(G1, G2)) | isOne(G1) .
-% directionacent[G1, G2] :: ~var(contact(G1, G2)) | isOne(G2).
-% directionacent[G1, G2] :: var(contact(G1, G2)) | ~isOne(G1) | ~isOne(G2).
+% nonAdjOne[I, J] :: ~next(I, J, 0) &  same(I, J, 1) -> ~var(contact(I, J)).
+% nonAdjOne[I, J] ::  next(I, J, 0) & ~same(I, J, 1) -> ~var(contact(I, J)).
+% nonAdjOne[I, J] :: ~next(I, J, 0) & ~same(I, J, 1) -> ~var(contact(I, J)).
 
-% % Counting Potential Contacts
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% % We are going to count contact(G1, G2) for every directionacent
-% % Total number of contacts should be C
-% directionacent[G1, G2] :: #ground cardinality_var[0, contact(G1, G2)].
+% nonAdjOne[I, J] :: ~next(I, J, 1) &  same(I, J, 0) -> ~var(contact(I, J)).
+% nonAdjOne[I, J] ::  next(I, J, 1) & ~same(I, J, 0) -> ~var(contact(I, J)).
+% nonAdjOne[I, J] :: ~next(I, J, 1) & ~same(I, J, 0) -> ~var(contact(I, J)).
+
+% Counting Potential Contacts
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% We are going to count var(contact(G1, G2) for every adjacent
+% Total number of contacts should be C
+% nonAdjOne[I, J] :: #ground cardinality_var[0, contact(I, J)].
 % goal[C] :: #ground cardinality_bound[0, C].
