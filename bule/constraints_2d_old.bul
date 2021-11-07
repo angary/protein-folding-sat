@@ -48,7 +48,7 @@ adjacent[G1, G2] :: #exists[0] var(contact(G1, G2)).
 adjacent[G1, G2] :: #hide ~var(contact(G1, G2)).
 
 % If two adjacent points are "1" then there is a contact
-adjacent[G1, G2] :: ~var(contact(G1, G2)) | isOne(G1) .
+adjacent[G1, G2] :: ~var(contact(G1, G2)) | isOne(G1).
 adjacent[G1, G2] :: ~var(contact(G1, G2)) | isOne(G2).
 adjacent[G1, G2] :: var(contact(G1, G2)) | ~isOne(G1) | ~isOne(G2).
 

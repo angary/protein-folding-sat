@@ -67,7 +67,7 @@ def run_tests(sequences: List[dict], dimension: int, new: bool) -> None:
 
         input_file = os.path.join(INPUT_DIR, filename)
         new_flag = "-n" if new else ""
-        command = f"python3 encode.py {input_file} -s -t -d {new_flag}"
+        command = f"python3 encode.py {input_file} -s -t {new_flag} -d"
 
         if dimension in [2, 3]:
             command += f" {dimension}"

@@ -180,7 +180,7 @@ def encode(input_file: str, goal_contacts: int, dimension: int, new: bool) -> st
 
     bule_files_list = [
         f"bule/constraints_{dimension}d_{encoding_version}.bul",
-        "bule/cc_a.bul"
+        "bule/cc_a.bul" if not new else "bule/s_tot.bul" # For some reason new encoding does not work with cca
     ]
 
     bule_files = " ".join(bule_files_list)
