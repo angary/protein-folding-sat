@@ -25,7 +25,6 @@ different[I, J], dim[D] :: #hide ~same(I, J, D).
 different[I, J], dim[D], pos[P] ::  x(I, P, D) &  x(J, P, D) ->  same(I, J, D).
 different[I, J], dim[D], pos[P] :: ~x(I, P, D) &  x(J, P, D) -> ~same(I, J, D).
 different[I, J], dim[D], pos[P] ::  x(I, P, D) & ~x(J, P, D) -> ~same(I, J, D).
-different[I, J], dim[D], pos[P] ::  x(I, P, D) & ~x(J, P, D) -> ~same(I, J, D).
 different[I, J] :: dim[D] : ~same(I, J, D).
 
 % Every adjacent pair of character positions must be placed on adjacent points in the grid

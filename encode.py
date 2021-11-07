@@ -8,7 +8,7 @@ import time
 TEST_REPEATS = 1
 
 
-def main():
+def main() -> None:
     """
     Extract arguments and determine whether to perform an encoding or solve
     """
@@ -35,7 +35,7 @@ def main():
     return
 
 
-def timed_solve(input_file: str, dimension: int, new: bool):
+def timed_solve(input_file: str, dimension: int, new: bool) -> None:
     """
     Time how long it takes to solve a contact and write it into a file
     """
@@ -58,7 +58,7 @@ def timed_solve(input_file: str, dimension: int, new: bool):
     return
 
 
-def solve(input_file: str, dimension: int, new: bool):
+def solve(input_file: str, dimension: int, new: bool) -> dict[str, float]:
     """
     Start the goal contacts at 1 and then attempt to solve it, doubling the
     goal contacts until it is unsolvable. Then binary search for the largest
@@ -122,7 +122,7 @@ def solve(input_file: str, dimension: int, new: bool):
     }
 
 
-def solve_sat(input_file: str, goal_contacts: int, dimension: int, new: bool):
+def solve_sat(input_file: str, goal_contacts: int, dimension: int, new: bool) -> float:
     """
     Run an encoding of the input file, with the target goal of contacts and
     return the duration for solving if it managed
@@ -140,9 +140,10 @@ def solve_sat(input_file: str, goal_contacts: int, dimension: int, new: bool):
         print("SAT")
         return duration
     print("There was a bug in solving with bule")
+    return 0
+    
 
-
-def encode(input_file: str, goal_contacts: int, dimension: int, new: bool):
+def encode(input_file: str, goal_contacts: int, dimension: int, new: bool) -> str:
     """
     Generate bule encoding for a protein sequence and write it to a file in
     the models folder, returning the path to the file
@@ -194,7 +195,7 @@ def encode(input_file: str, goal_contacts: int, dimension: int, new: bool):
     return out_file
 
 
-def get_sequence(input_file: str):
+def get_sequence(input_file: str) -> str:
     """
     Read the input file and return the string sequence of 1s and 0s
     """
@@ -203,7 +204,7 @@ def get_sequence(input_file: str):
     return sequence
 
 
-def get_adjacent_ones(sequence: str):
+def get_adjacent_ones(sequence: str) -> int:
     """
     Return the number of adjacent ones that are in the string
     """
@@ -214,24 +215,21 @@ def get_adjacent_ones(sequence: str):
     return count
 
 
-def get_grid_diameter(dimension: int, n: int):
+def get_grid_diameter(dimension: int, n: int) -> int:
     """
     Return ideal grid diameter, given the dimension and protein length
     """
     if dimension == 2:
         if n >= 12:
-            w = 1 + n // 4
-        else:
-            w = n
+            return 1 + n // 4
+        return n
     else:
         if n >= 20:
-            w = 2 + n // 8 
-        else:
-            w = 2 + n // 4
-    return w
+            return 2 + n // 8 
+        return 2 + n // 4
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """
     Parse command line arguments
     """

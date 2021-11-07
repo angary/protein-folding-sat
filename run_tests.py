@@ -15,7 +15,7 @@ INPUT_DIR = "./input"
 # Ignore these inputs
 IGNORE = []
 
-def main():
+def main() -> None:
     args = parse_args()
     dimension = args.dimension
     seq_type = args.type
@@ -28,7 +28,7 @@ def main():
     return
 
 
-def get_sequences(input_dir_name: str, seq_type: str):
+def get_sequences(input_dir_name: str, seq_type: str) -> list[dict[str, str]]:
     """
     Get a list of the sequences and file names from the input directory
     """
@@ -48,7 +48,7 @@ def get_sequences(input_dir_name: str, seq_type: str):
     return sorted(sequences, key=lambda x:len(x["string"]))
 
 
-def is_type(filename, seq_type):
+def is_type(filename, seq_type) -> bool:
     if seq_type == "all":
         return True
     elif seq_type == "real" and re.match("^[a-zA-Z0-9]{6}$", filename):
@@ -58,7 +58,7 @@ def is_type(filename, seq_type):
     return False
 
 
-def run_tests(sequences: List[dict], dimension: int, new: bool):
+def run_tests(sequences: List[dict], dimension: int, new: bool) -> None:
     for sequence in sequences:
         filename = sequence["filename"]
         string = sequence["string"]
@@ -80,7 +80,7 @@ def run_tests(sequences: List[dict], dimension: int, new: bool):
     return
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-d",
