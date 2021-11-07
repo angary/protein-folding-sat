@@ -54,7 +54,7 @@ nonAdjOne[I, J], dim[D], pos[P],  pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J,
 nonAdjOne[I, J], dim[D], pos[P],  pos[P + 1], ~pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) -> ~next(I, J, D).
 nonAdjOne[I, J], dim[D], pos[P], ~pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P - 1, D) -> ~next(I, J, D).
 
-% % If I and J are next to each other then there is a contact
+% f I and J are next to each other then there is a contact
 sequence[I, 1], sequence[J, 1], I + 1 < J :: #exists[0] var(contact(I, J)).
 sequence[I, 1], sequence[J, 1], I + 1 < J :: #hide ~var(contact(I, J)).
 % Only condition for contact if Next in D1 and same in D2
