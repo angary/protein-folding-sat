@@ -151,7 +151,7 @@ def encode(input_file: str, goal_contacts: int, dimension: int, new: bool) -> st
     file_name = input_file.split("/")[-1]
 
     sequence = get_sequence(input_file)
-    base_goal = get_adjacent_ones(sequence)
+    base_goal = 0 if new else get_adjacent_ones(sequence)
     n = len(sequence)
     w = get_grid_diameter(dimension, n)
     encoding_version = "new" if new else "old"

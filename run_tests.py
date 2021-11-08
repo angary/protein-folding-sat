@@ -19,12 +19,12 @@ def main() -> None:
     args = parse_args()
     dimension = args.dimension
     seq_type = args.type
-    new = args.new
+    encoding_type = args.encoding_type
 
     sequences = get_sequences(INPUT_DIR, seq_type)
     for sequence in sequences:
         print(sequence)
-    run_tests(sequences, dimension, new)
+    run_tests(sequences, dimension, encoding_type)
     return
 
 
@@ -45,7 +45,7 @@ def get_sequences(input_dir_name: str, seq_type: str) -> list[dict[str, str]]:
                 "string": sequence
             })
     # Sort sequence by shortest sequence first
-    return sorted(sequences, key=lambda x:len(x["string"]))
+    return sorted(sequences, key=lambda x: (len(x["string"]), x["filename"]))
 
 
 def is_type(filename, seq_type) -> bool:
@@ -58,25 +58,34 @@ def is_type(filename, seq_type) -> bool:
     return False
 
 
-def run_tests(sequences: List[dict], dimension: int, new: bool) -> None:
+def run_tests(sequences: List[dict], dimension: int, encoding_type: str) -> None:
     for sequence in sequences:
         filename = sequence["filename"]
         string = sequence["string"]
 
-        print(f"Testing {filename}: {string}")
+        new = False if encoding_type == "old" else True
+        old = False if encoding_type == "new" else True
+        if new:
+            run_test(filename, string, True, dimension)
+        if old:
+            run_test(filename, string, False, dimension)
+    return
 
-        input_file = os.path.join(INPUT_DIR, filename)
-        new_flag = "-n" if new else ""
-        command = f"python3 encode.py {input_file} -s -t {new_flag} -d"
 
-        if dimension in [2, 3]:
-            command += f" {dimension}"
-            subprocess.run(command.split(), capture_output=False)
-        else:
-            command_2d = command + " 2"
-            subprocess.run(command_2d.split(), capture_output=False)
-            command_3d = command + " 3"
-            subprocess.run(command_3d.split(), capture_output=False)
+def run_test(filename: str, string: str, new: bool, dimension: int) -> None:
+    input_file = os.path.join(INPUT_DIR, filename)
+
+    new_flag = "-n" if new else ""
+
+    if dimension == 1:
+        dims = [2, 3]
+    else:
+        dims = [dimension]
+
+    for dim in dims:
+        print(f"Testing {input_file}: \t{string} \t{new = } \t{dim = }")
+        command = f"python3 encode.py {input_file} -s -t {new_flag} -d {dim}"
+        subprocess.run(command.split(), capture_output=True)
     return
 
 
@@ -101,10 +110,13 @@ def parse_args() -> argparse.Namespace:
         help="the type of protein sequences to test, default value: all"
     )
     parser.add_argument(
-        "-n",
-        "--new",
-        action="store_true",
-        help="use the new encoding"
+        "-e",
+        "--encoding-type",
+        nargs="?",
+        type=str,
+        default="both",
+        choices={"both", "old", "new"},
+        help="the encoding type to test"
     )
     return parser.parse_args()
 
