@@ -21,12 +21,14 @@ The objective of this project is to examine the HP Model of protein folding unde
 
 ### Files
 
-| File                                         | Purpose                                                                                                                   |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| [gen_rand_sequence.py](gen_rand_sequence.py) | Writes to a file a random string of "0"s and "1"s                                                                         |
-| [get_sequences.py](get_sequences.py)         | Reads in the data from the `Dataset` folder and generates file containing "0"s and "1s"                                   |
-| [encode.py](encode.py)                       | Generates bule2 encoding for a protein. If given the `--solve` flag, finds the max num of contacts through binary search. |
-| [validate.py](validate.py)                   | Compares the output results with the expected results.                                                                    |
+| **File**                                     | **Purpose**                                                                                            |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| [gen_rand_sequence.py](gen_rand_sequence.py) | Writes to a file a random string of "0"s and "1"s                                                      |
+| [get_sequences.py](get_sequences.py)         | Reads in the data from the `Dataset` folder and generates file containing "0"s and "1s"                |
+| [encode.py](encode.py)                       | Generates bule2 encoding for a protein. If given the `--solve` flag, finds the max num of contacts     |
+| [run_tests.py](run_tests.py)                 | Go through the input sequences and benchmark the encodings, writing results into the results folder    |
+| [helpers](helpers/)                           | Contains scripts to visualise the protein embedding from clauses / validate new encoding               |
+| [analysis.ipynb](analysis.ipynb)             | Check that the new and old encoding produces the same number of contacts and compare their performance |
 
 The project uses the [Bule SAT programming language](https://github.com/vale1410/bule) for generating the encodings, and [kissat](https://github.com/arminbiere/kissat) for solving the encodings.
 
