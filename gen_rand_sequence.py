@@ -22,7 +22,7 @@ def main():
 
 def gen_sequences(length: int):
     file_name_base = f"{os.path.join(FILE_PATH, 'length')}_{str(length)}"
-    strings = []
+    strings: list[str] = []
 
     while len(strings) < N:
 

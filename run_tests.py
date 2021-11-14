@@ -13,7 +13,7 @@ MAX_LEN = 30
 INPUT_DIR = "./input"
 
 # Ignore these inputs
-IGNORE = []
+IGNORE: list[str] = []
 
 def main() -> None:
     args = parse_args()

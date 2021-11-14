@@ -1,6 +1,5 @@
 """Take in a string of 1s and 0s and convert it into a bul encoding"""
 
-
 import argparse
 import subprocess
 import time
@@ -65,18 +64,12 @@ def solve(input_file: str, dimension: int, new: bool) -> dict[str, float]:
     possible value goal contacts can be whilst solvable and return it.
     """
     # Double goal_contacts until it is unsolvable or it is larger than the
-    # length of the sequence
+    # maximum number of contacts that it can generate
     goal_contacts = 1
-    sequence_length = len(get_sequence(input_file))
-    total_duration = 0
-    print(
-        """
-        ========================================================================
-                                    Start doubling
-        ========================================================================
-        """
-    )
-    while goal_contacts < sequence_length:
+    max_contacts = get_max_contacts(get_sequence(input_file))
+    total_duration = 0.0
+    print("Start doubling")
+    while goal_contacts <= max_contacts:
         print(f"Solving {goal_contacts}: ", end="", flush=True)
         duration = solve_sat(input_file, goal_contacts, dimension, new)
         total_duration += abs(duration)
@@ -84,20 +77,13 @@ def solve(input_file: str, dimension: int, new: bool) -> dict[str, float]:
         if not solved:
             break
         goal_contacts *= 2
-    print(f"Failed to solve at {goal_contacts}")
-    print()
+    print(f"Failed to solve at {goal_contacts}\n")
 
     # Binary search to the maximum possible value that the 
     max_contacts = goal_contacts // 2
     lo = goal_contacts // 2 + 1
     hi = goal_contacts - 1
-    print(
-        """
-        ========================================================================
-                        Start binary search to max contacts
-        ========================================================================
-        """
-    )
+    print("Start binary search to max contacts")
     while lo <= hi:
         # Find the number of contacts
         goal_contacts = (hi + lo) // 2
@@ -141,7 +127,7 @@ def solve_sat(input_file: str, goal_contacts: int, dimension: int, new: bool) ->
         return duration
     print("There was a bug in solving with bule")
     return 0
-    
+
 
 def encode(input_file: str, goal_contacts: int, dimension: int, new: bool) -> str:
     """
@@ -155,10 +141,9 @@ def encode(input_file: str, goal_contacts: int, dimension: int, new: bool) -> st
     n = len(sequence)
     w = get_grid_diameter(dimension, n)
     encoding_version = "new" if new else "old"
-    
+
     # Number of contacts = adjacent "1"s minus offset
     with open(f"models/{file_name}.bul", "w+") as f:
-
         # Write sequence string
         f.write(f"% {sequence}\n\n")
 
@@ -180,7 +165,7 @@ def encode(input_file: str, goal_contacts: int, dimension: int, new: bool) -> st
 
     bule_files_list = [
         f"bule/constraints_{dimension}d_{encoding_version}.bul",
-        "bule/cc_a.bul" if not new else "bule/s_tot.bul" # For some reason new encoding does not work with cca
+        "bule/cc_a.bul" if not new else "bule/s_tot.bul"  # For some reason new encoding does not work with cca
     ]
 
     bule_files = " ".join(bule_files_list)
@@ -225,8 +210,20 @@ def get_grid_diameter(dimension: int, n: int) -> int:
         return n
     else:
         if n >= 20:
-            return 2 + n // 8 
+            return 2 + n // 8
         return 2 + n // 4
+
+
+def get_max_contacts(sequence: str) -> int:
+    """
+    Find the maximum number of contacts that the sequence can have
+    """
+    total = 0
+    n = len(sequence)
+    for i in range(n - 1):
+        if sequence[i] == "1":
+            total += sequence.count("1", i + 2)
+    return total
 
 
 def parse_args() -> argparse.Namespace:
@@ -240,37 +237,27 @@ def parse_args() -> argparse.Namespace:
         help="the path to the input file containing a string of 1s and 0s"
     )
     parser.add_argument(
-        "-c",
-        "--contacts",
-        nargs="?",
-        type=int,
-        default=1,
+        "-c", "--contacts",
+        nargs="?", type=int, default=1,
         help="the goal number of (H-H) contacts, default value: 1"
     )
     parser.add_argument(
-        "-d",
-        "--dimension",
-        nargs="?",
-        type=int,
-        default=2,
-        choices={2, 3},
+        "-d", "--dimension",
+        nargs="?", type=int, default=2, choices={2, 3},
         help="the dimension of the embedding grid, default value: 2"
     )
     parser.add_argument(
-        "-s",
-        "--solve",
+        "-s", "--solve",
         action="store_true",
         help="solve for the maximum number of contacts"
     )
     parser.add_argument(
-        "-t",
-        "--time",
+        "-t", "--time",
         action="store_true",
         help="record the time taken to solve"
     )
     parser.add_argument(
-        "-n",
-        "--new",
+        "-n", "--new",
         action="store_true",
         help="use the new encoding"
     )

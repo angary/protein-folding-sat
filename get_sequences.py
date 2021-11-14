@@ -6,10 +6,9 @@ import sys
 import os
 
 from pathlib import Path
-from typing import List, TextIO
 
 
-def write_binary_sequence_and_contact_number(read_file: TextIO, output_file: str) -> None:
+def write_binary_sequence_and_contact_number(read_file: Path, output_file: Path) -> None:
     with open(output_file, "w") as f:
         file_contents = read_file.read_text()
         remarks = file_contents.split("REMARK")
@@ -57,7 +56,7 @@ def get_binary_sequence(amino_acid_sequence: str) -> str:
     return sequence
 
 
-def get_coordinates(coord_str) -> List[List[int]]:
+def get_coordinates(coord_str) -> list[list[int]]:
     coords = list()
     coords.append([0,0,0])
 
@@ -84,7 +83,7 @@ def get_coordinates(coord_str) -> List[List[int]]:
     return coords
 
 
-def count_contacts(coords: List[List[int]], string: str) -> int:
+def count_contacts(coords: list[list[int]], string: str) -> int:
     contacts = 0
 
     for i, x in enumerate(coords):
@@ -102,7 +101,7 @@ def count_contacts(coords: List[List[int]], string: str) -> int:
     return contacts
 
 
-def main(argv: List[str]) -> None:
+def main(argv: list[str]) -> None:
     if (len(argv) < 2 or len == 3):
         raise Exception("ERROR: Usage\n\tpython3 get_sequences.py {file/directory to read from} {flag (-d(irectory) or -f(ile))} {file type (if flag = -d)}")
     elif len(argv) == 4:
