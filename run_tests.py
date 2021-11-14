@@ -5,9 +5,6 @@ import argparse
 import os
 import re
 import subprocess
-import sys
-
-from typing import List
 
 MAX_LEN = 30
 INPUT_DIR = "./input"
@@ -58,7 +55,7 @@ def is_type(filename, seq_type) -> bool:
     return False
 
 
-def run_tests(sequences: List[dict], dimension: int, encoding_type: str) -> None:
+def run_tests(sequences: list[dict], dimension: int, encoding_type: str) -> None:
     for sequence in sequences:
         filename = sequence["filename"]
         string = sequence["string"]
@@ -92,31 +89,19 @@ def run_test(filename: str, string: str, new: bool, dimension: int) -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-d",
-        "--dimension",
-        nargs="?",
-        type=int,
-        default=1,
-        choices={2, 3},
-        help="the dimension of the embedding grid, by default it will test both"
+        "-d", "--dimension",
+        nargs="?", type=int, default=1, choices={2, 3},
+        help="the dimension of the embedding grid, default: 2d and 3d"
     )
     parser.add_argument(
-        "-t",
-        "--type",
-        nargs="?",
-        type=str,
-        default="all",
-        choices={"all", "random", "real"},
+        "-t", "--type",
+        nargs="?", type=str, default="all", choices={"all", "random", "real"},
         help="the type of protein sequences to test, default value: all"
     )
     parser.add_argument(
-        "-e",
-        "--encoding-type",
-        nargs="?",
-        type=str,
-        default="both",
-        choices={"both", "old", "new"},
-        help="the encoding type to test"
+        "-e", "--encoding-type",
+        nargs="?", type=str, default="both", choices={"both", "old", "new"},
+        help="the encoding type to test, default: new and old"
     )
     return parser.parse_args()
 

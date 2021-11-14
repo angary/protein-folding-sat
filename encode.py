@@ -4,7 +4,7 @@ import argparse
 import subprocess
 import time
 
-TEST_REPEATS = 1
+TEST_REPEATS = 5
 
 
 def main() -> None:
@@ -44,16 +44,17 @@ def timed_solve(input_file: str, dimension: int, new: bool) -> None:
     results_file = f"results/{filename}_{dimension}d_{encoding_type}.csv"
 
     with open(results_file, "w+") as f:
-        f.write("length,time,contacts\n")
+        f.write("length,time,contacts,variables,clauses\n")
 
     for _ in range(TEST_REPEATS):
         result = solve(input_file, dimension, new)
         max_contacts = result["max_contacts"]
         duration = result["duration"]
+        vars, clauses = get_num_vars_and_clauses(filename, new)
         print(results_file)
 
         with open(results_file, "a") as f:
-            f.write(f"{length},{duration},{max_contacts}\n")
+            f.write(f"{length},{duration},{max_contacts},{vars},{clauses}\n")
     return
 
 
@@ -141,9 +142,10 @@ def encode(input_file: str, goal_contacts: int, dimension: int, new: bool) -> st
     n = len(sequence)
     w = get_grid_diameter(dimension, n)
     encoding_version = "new" if new else "old"
+    in_file = f"models/bul/{file_name}_{encoding_version}.bul"
 
     # Number of contacts = adjacent "1"s minus offset
-    with open(f"models/{file_name}.bul", "w+") as f:
+    with open(in_file, "w+") as f:
         # Write sequence string
         f.write(f"% {sequence}\n\n")
 
@@ -169,8 +171,7 @@ def encode(input_file: str, goal_contacts: int, dimension: int, new: bool) -> st
     ]
 
     bule_files = " ".join(bule_files_list)
-    in_file = f"models/{file_name}.bul"
-    out_file = f"models/{file_name}.cnf"
+    out_file = f"models/cnf/{file_name}_{encoding_version}.cnf"
     command = f"bule2 --output dimacs {bule_files} {in_file} > {out_file}"
     # command = f"bule2 --output qdimacs {bule_files} {in_file} | sed '2d' > {out_file}"
     # command = f"bule2 {bule_files} {in_file} | grep -v exists > {out_file}"
@@ -178,6 +179,17 @@ def encode(input_file: str, goal_contacts: int, dimension: int, new: bool) -> st
     subprocess.run(command, shell=True)
     print(out_file)
     return out_file
+
+
+def get_num_vars_and_clauses(filename: str, new: bool) -> tuple[int, int]:
+    """
+    Given the name of the input, return the number of variables and
+    clauses in the encoding
+    """
+    encoding_version = "new" if new else "old"
+    with open(f"models/cnf/{filename}_{encoding_version}.cnf") as f:
+        line = f.readline()
+        return tuple(map(int, line.split()[-2:]))
 
 
 def get_sequence(input_file: str) -> str:
