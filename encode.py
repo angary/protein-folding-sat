@@ -4,7 +4,7 @@ import argparse
 import subprocess
 import time
 
-TEST_REPEATS = 5
+TEST_REPEATS = 1
 
 
 def main() -> None:
@@ -70,6 +70,7 @@ def solve(input_file: str, dimension: int, new: bool) -> dict[str, float]:
     max_contacts = get_max_contacts(get_sequence(input_file))
     total_duration = 0.0
     print("Start doubling")
+    print(f"{max_contacts = }")
     while goal_contacts <= max_contacts:
         print(f"Solving {goal_contacts}: ", end="", flush=True)
         duration = solve_sat(input_file, goal_contacts, dimension, new)
@@ -81,11 +82,11 @@ def solve(input_file: str, dimension: int, new: bool) -> dict[str, float]:
     print(f"Failed to solve at {goal_contacts}\n")
 
     # Binary search to the maximum possible value that the 
-    max_contacts = goal_contacts // 2
     lo = goal_contacts // 2 + 1
     hi = goal_contacts - 1
+    goal_contacts = (hi + lo) // 2
     print("Start binary search to max contacts")
-    while lo <= hi:
+    while lo <= hi and goal_contacts <= max_contacts:
         # Find the number of contacts
         goal_contacts = (hi + lo) // 2
 
@@ -138,7 +139,7 @@ def encode(input_file: str, goal_contacts: int, dimension: int, new: bool) -> st
     file_name = input_file.split("/")[-1]
 
     sequence = get_sequence(input_file)
-    base_goal = 0 if new else get_adjacent_ones(sequence)
+    base_goal = get_adjacent_ones(sequence)
     n = len(sequence)
     w = get_grid_diameter(dimension, n)
     encoding_version = "new" if new else "old"
@@ -232,9 +233,12 @@ def get_max_contacts(sequence: str) -> int:
     """
     total = 0
     n = len(sequence)
+    print(sequence)
     for i in range(n - 1):
         if sequence[i] == "1":
-            total += sequence.count("1", i + 2)
+            for j in range(i + 3, n, 2):
+                if sequence[j] == "1":
+                    total += 1
     return total
 
 
