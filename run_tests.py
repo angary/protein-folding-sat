@@ -6,6 +6,8 @@ import os
 import re
 import subprocess
 
+from time import gmtime, strftime
+
 MAX_LEN = 30
 INPUT_DIR = "./input"
 
@@ -80,7 +82,7 @@ def run_test(filename: str, string: str, new: bool, dimension: int) -> None:
         dims = [dimension]
 
     for dim in dims:
-        print(f"Testing {input_file}: \t{string} \t{new = } \t{dim = }")
+        print(f"Testing {input_file}: \t{string} \t{new = } \t{dim = } {strftime('%H:%M:%S', gmtime())}")
         command = f"python3 encode.py {input_file} -s -t {new_flag} -d {dim}"
         subprocess.run(command.split(), capture_output=True)
     return
