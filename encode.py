@@ -24,13 +24,11 @@ def main() -> None:
         print("Attempting to solve\n")
         max_contacts = solve(input_file, dimension, new)
         print(f"Max contacts: {max_contacts}")
-    elif not args.solve and not args.time:
+    else:
         print("Attempting to encode\n")
-        file_path = encode(input_file, goal_contacts, dimension, new)
+        file_path = encode(input_file, goal_contacts, dimension, new, args.time)
         print(f"Encoding bul    : {file_path.replace('cnf', 'bul')}")
         print(f"Encoding kissat : {file_path}")
-    else:
-        print("Error with options")
     return
 
 
@@ -131,7 +129,7 @@ def solve_sat(input_file: str, goal_contacts: int, dimension: int, new: bool) ->
     return 0
 
 
-def encode(input_file: str, goal_contacts: int, dimension: int, new: bool) -> str:
+def encode(input_file: str, goal_contacts: int, dimension: int, new: bool, timed: bool = False) -> str:
     """
     Generate bule encoding for a protein sequence and write it to a file in
     the models folder, returning the path to the file
@@ -178,7 +176,15 @@ def encode(input_file: str, goal_contacts: int, dimension: int, new: bool) -> st
     # command = f"bule2 {bule_files} {in_file} | grep -v exists > {out_file}"
     # bule2 --solve true --solver kissat  bule/constraints_2d_old.bul bule/s_tot.bul models/gen_length_6_1.bul
     subprocess.run(command, shell=True)
-    print(out_file)
+    # print(out_file)
+
+    if timed:
+        results_file = f"results/{file_name}_{dimension}d_{encoding_version}.csv"
+        print(results_file)
+        with open(results_file, "w+") as f:
+            f.write("length,time,contacts,variables,clauses\n")
+            vars, clauses = get_num_vars_and_clauses(file_name, new)
+            f.write(f"{n},0,0,{vars},{clauses}")
     return out_file
 
 

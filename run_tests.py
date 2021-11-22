@@ -6,7 +6,7 @@ import os
 import re
 import subprocess
 
-from time import gmtime, strftime
+from datetime import datetime
 
 MAX_LEN = 30
 INPUT_DIR = "./input"
@@ -73,19 +73,26 @@ def run_tests(sequences: list[dict], dimension: int, encoding_type: str) -> None
 
 def run_test(filename: str, string: str, new: bool, dimension: int) -> None:
     input_file = os.path.join(INPUT_DIR, filename)
-
     new_flag = "-n" if new else ""
-
-    if dimension == 1:
-        dims = [2, 3]
-    else:
-        dims = [dimension]
+    dims = [2, 3] if dimension == 1 else [dimension]
+    seq_len = get_seq_len(input_file)
 
     for dim in dims:
-        print(f"Testing {input_file}: \t{string} \t{new = } \t{dim = } {strftime('%H:%M:%S', gmtime())}")
-        command = f"python3 encode.py {input_file} -s -t {new_flag} -d {dim}"
-        subprocess.run(command.split(), capture_output=True)
+        curr_time = datetime.now().strftime("%H:%M:%S")
+        print(f"Testing {input_file}: \t{string} \t{new = } \t{dim = } {curr_time}")
+
+        # We do not solve using the old encoding if 3D and len > 13
+        if dim == 3 and seq_len >= 13 and not new:
+            command = f"python3 encode.py {input_file} -t {new_flag} -d {dim}"
+        else:
+            command = f"python3 encode.py {input_file} -s -t {new_flag} -d {dim}"
+    subprocess.run(command.split(), capture_output=True)
     return
+
+
+def get_seq_len(input_file: str) -> int:
+    with open(input_file) as f:
+        return len(f.readline().removesuffix("\n"))
 
 
 def parse_args() -> argparse.Namespace:
