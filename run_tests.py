@@ -19,15 +19,16 @@ def main() -> None:
     dimension = args.dimension
     seq_type = args.type
     encoding_type = args.encoding_type
+    min_len = args.min_len
 
-    sequences = get_sequences(INPUT_DIR, seq_type)
+    sequences = get_sequences(INPUT_DIR, seq_type, min_len, MAX_LEN)
     for sequence in sequences:
         print(sequence)
     run_tests(sequences, dimension, encoding_type)
     return
 
 
-def get_sequences(input_dir_name: str, seq_type: str) -> list[dict[str, str]]:
+def get_sequences(input_dir_name: str, seq_type: str, min_len: int, max_len: int) -> list[dict[str, str]]:
     """
     Get a list of the sequences and file names from the input directory
     """
@@ -44,6 +45,7 @@ def get_sequences(input_dir_name: str, seq_type: str) -> list[dict[str, str]]:
                 "string": sequence
             })
     # Sort sequence by shortest sequence first
+    sequences = [s for s in sequences if len(s["string"]) >= min_len and len(s["string"]) < max_len]
     return sorted(sequences, key=lambda x: (len(x["string"]), x["filename"]))
 
 
@@ -86,7 +88,7 @@ def run_test(filename: str, string: str, new: bool, dimension: int) -> None:
             command = f"python3 encode.py {input_file} -t {new_flag} -d {dim}"
         else:
             command = f"python3 encode.py {input_file} -s -t {new_flag} -d {dim}"
-    subprocess.run(command.split(), capture_output=True)
+    subprocess.run(command.split(), capture_output=False)
     return
 
 
@@ -111,6 +113,11 @@ def parse_args() -> argparse.Namespace:
         "-e", "--encoding-type",
         nargs="?", type=str, default="both", choices={"both", "old", "new"},
         help="the encoding type to test, default: new and old"
+    )
+    parser.add_argument(
+        "-m", "--min-len",
+        nargs="?", type=int, default=0,
+        help="the minimum length sequence to test"
     )
     return parser.parse_args()
 

@@ -43,26 +43,26 @@ adj[I, J], dim[D] :: same(I, I + 1, D) -> ~direction(I, J, D). % If it is the sa
 
 % Identifying Potential Contacts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-sequence[I, 1], sequence[J, 1], I + 2 < J :: #ground nonAdjOne[I, J].
-nonAdjOne[I, J], dim[D] :: #exists[0] next(I, J, D).
-nonAdjOne[I, J], dim[D] :: #hide next(I, J, D), ~next(I, J, D).
+sequence[I, 1], sequence[J, 1], I + 2 < J :: #ground non_adj_one[I, J].
+non_adj_one[I, J], dim[D] :: #exists[0] next(I, J, D).
+non_adj_one[I, J], dim[D] :: #hide next(I, J, D), ~next(I, J, D).
 
 % If I and J are adjacent in one dir and not the others, they are next to each other
-nonAdjOne[I, J], dim[D], pos[P], pos[P + 1] :: x(I, P, D) & x(J, P + 1, D) -> next(I, J, D).
-nonAdjOne[I, J], dim[D], pos[P], pos[P - 1] :: x(I, P, D) & x(J, P - 1, D) -> next(I, J, D).
-nonAdjOne[I, J], dim[D], pos[P],  pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) & ~x(J, P - 1, D) -> ~next(I, J, D).
-nonAdjOne[I, J], dim[D], pos[P],  pos[P + 1], ~pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) -> ~next(I, J, D).
-nonAdjOne[I, J], dim[D], pos[P], ~pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P - 1, D) -> ~next(I, J, D).
+non_adj_one[I, J], dim[D], pos[P], pos[P + 1] :: x(I, P, D) & x(J, P + 1, D) -> next(I, J, D).
+non_adj_one[I, J], dim[D], pos[P], pos[P - 1] :: x(I, P, D) & x(J, P - 1, D) -> next(I, J, D).
+non_adj_one[I, J], dim[D], pos[P],  pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) & ~x(J, P - 1, D) -> ~next(I, J, D).
+non_adj_one[I, J], dim[D], pos[P],  pos[P + 1], ~pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) -> ~next(I, J, D).
+non_adj_one[I, J], dim[D], pos[P], ~pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P - 1, D) -> ~next(I, J, D).
 
 % f I and J are next to each other then there is a contact
-nonAdjOne[I, J], I + 2 < J, J - I #mod 2 == 1 :: #ground pontentialContact[I, J].
-pontentialContact[I, J] :: #exists[0] var(contact(I, J)).
-pontentialContact[I, J] :: #hide ~var(contact(I, J)).
+non_adj_one[I, J], I + 2 < J, J - I #mod 2 == 1 :: #ground potential_contact[I, J].
+potential_contact[I, J] :: #exists[0] var(contact(I, J)).
+potential_contact[I, J] :: #hide ~var(contact(I, J)).
 % Only condition for contact if Next in D1 and same in D2
-pontentialContact[I, J], dim[D1] ::  next(I, J, D1) & dim[D2], D1 != D2 : same(I, J, D2) ->  var(contact(I, J)).
-pontentialContact[I, J], dim[D1] :: ~next(I, J, D1) & dim[D2], D1 != D2 : same(I, J, D2) -> ~var(contact(I, J)).
-pontentialContact[I, J], dim[D1] :: ~next(I, J, D1) & dim[D2], D1 != D2 : ~next(I, J, D2) -> ~var(contact(I, J)).
-pontentialContact[I, J], dim[D1], dim[D2], D1 != D2 :: next(I, J, D1) & ~same(I, J, D2) -> ~var(contact(I, J)).
+potential_contact[I, J], dim[D1] ::  next(I, J, D1) & dim[D2], D1 != D2 : same(I, J, D2) ->  var(contact(I, J)).
+potential_contact[I, J], dim[D1] :: ~next(I, J, D1) & dim[D2], D1 != D2 : same(I, J, D2) -> ~var(contact(I, J)).
+potential_contact[I, J], dim[D1] :: ~next(I, J, D1) & dim[D2], D1 != D2 : ~next(I, J, D2) -> ~var(contact(I, J)).
+potential_contact[I, J], dim[D1], dim[D2], D1 != D2 :: next(I, J, D1) & ~same(I, J, D2) -> ~var(contact(I, J)).
 
 % Counting Potential Contacts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -77,5 +77,5 @@ sequence[I, 1], sequence[I + 1, 1], accumulate[I, J] :: #ground accumulate[I + 1
 accumulate[I, J], ~sequence[I + 1, 0], ~sequence[I + 1, 1] :: #ground base_contacts[J].
 
 % Total number of contacts should be C
-pontentialContact[I, J] :: #ground cardinality_var[0, contact(I, J)].
+potential_contact[I, J] :: #ground cardinality_var[0, contact(I, J)].
 goal[C], base_contacts[B] :: #ground cardinality_bound[0, C - B].

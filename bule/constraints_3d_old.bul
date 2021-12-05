@@ -1,14 +1,12 @@
-% bule2 --solve --models 0 constraints.bul models/
-
 % Generate the grid from the width
 width[W] :: #ground coordinate[0..W - 1].
 coordinate[I], coordinate[J], coordinate[K] :: #ground grid[c(I, J, K)].
 
 % Generate adjacent points
-coordinate[I], coordinate[I + 1] :: #ground nextCoordinate[I, I + 1].
-coordinate[I], coordinate[J], nextCoordinate[K, L] :: #ground adjacent[c(I, J, K), c(I, J, L)]. % Right (x)
-coordinate[I], coordinate[J], nextCoordinate[K, L] :: #ground adjacent[c(I, K, J), c(I, L, J)]. % Down (y)
-coordinate[I], coordinate[J], nextCoordinate[K, L] :: #ground adjacent[c(K, I, J), c(L, I, J)]. % Bottom (z)
+coordinate[I], coordinate[I + 1] :: #ground next_coordinate[I, I + 1].
+coordinate[I], coordinate[J], next_coordinate[K, L] :: #ground adjacent[c(I, J, K), c(I, J, L)]. % Right (x)
+coordinate[I], coordinate[J], next_coordinate[K, L] :: #ground adjacent[c(I, K, J), c(I, L, J)]. % Down (y)
+coordinate[I], coordinate[J], next_coordinate[K, L] :: #ground adjacent[c(K, I, J), c(L, I, J)]. % Bottom (z)
 
 % Ensuring Legal Embeddings
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -32,18 +30,18 @@ sequence[I, B1], sequence[I + 1, B2], grid[G1] :: ~x(I, G1) | adjacent[G1, G2] :
 
 % Identifying Potential Contacts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-grid[G] :: #exists[0] isOne(G).
-grid[G] :: #hide ~isOne(G).
+grid[G] :: #exists[0] is_one(G).
+grid[G] :: #hide ~is_one(G).
 
-grid[G], sequence[I, 1] :: ~x(I, G) | isOne(G).
-grid[G] :: sequence[I, 1] : x(I, G) | ~isOne(G).
+grid[G], sequence[I, 1] :: ~x(I, G) | is_one(G).
+grid[G] :: sequence[I, 1] : x(I, G) | ~is_one(G).
 
 adjacent[G1, G2] :: #exists[0] var(contact(G1, G2)).
 adjacent[G1, G2] :: #hide var(contact(G1, G2)), ~var(contact(G1, G2)).
 
-adjacent[G1, G2] :: ~var(contact(G1, G2)) | isOne(G1) .
-adjacent[G1, G2] :: ~var(contact(G1, G2)) | isOne(G2).
-adjacent[G1, G2] :: var(contact(G1, G2)) | ~isOne(G1) | ~isOne(G2).
+adjacent[G1, G2] :: ~var(contact(G1, G2)) | is_one(G1) .
+adjacent[G1, G2] :: ~var(contact(G1, G2)) | is_one(G2).
+adjacent[G1, G2] :: var(contact(G1, G2)) | ~is_one(G1) | ~is_one(G2).
 
 % Counting Potential Contacts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
