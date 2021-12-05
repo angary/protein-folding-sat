@@ -19,8 +19,6 @@ The objective of this project is to examine the HP Model of protein folding unde
 
 ## Setup
 
-### Files
-
 | **File**                                     | **Purpose**                                                                                            |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | [gen_rand_sequence.py](gen_rand_sequence.py) | Writes to a file a random string of "0"s and "1"s                                                      |
@@ -31,5 +29,21 @@ The objective of this project is to examine the HP Model of protein folding unde
 | [analysis.ipynb](analysis.ipynb)             | Check that the new and old encoding produces the same number of contacts and compare their performance |
 
 The project uses the [Bule SAT programming language](https://github.com/vale1410/bule) for generating the encodings, and [kissat](https://github.com/arminbiere/kissat) for solving the encodings.
+
+
+## Usage
+
+Inside the `input` directory are files, each of which contain a string of 1s and 0s, used to model a protein sequence used in the prototein problem.
+These files are used as inputs for the protein folding problem.
+They can then be encoded in a bule (`.bule`) or DIMACS CNF format (`.cnf`) which contains a problem of solving for a random walk on a sequence that results in a certain number of H-H contacts.
+Running the following command 
+```
+python3 encode.py <input_file> -c <contact_count> -d <dimension> 
+```
+will create a bule encoding inside the `models/bul` directory, and a DIMACS CNF encoding in the `models/cnf` directory.
+
+Adding the `-s` or `--solve` flag will result in a binary search for the maximum number of contacts possible.
+
+Adding the `-t` or `--track` flag will result in storing details such as time, contacts, variables and clauses for solving an encoding in a csv file in the `results` directory.
 
 The GitHub repository from the original research paper can be found [here](https://github.com/hannah-aught/prototein-problem).

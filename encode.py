@@ -274,9 +274,9 @@ def parse_args() -> argparse.Namespace:
         help="solve for the maximum number of contacts"
     )
     parser.add_argument(
-        "-t", "--time",
+        "-t", "--track",
         action="store_true",
-        help="record the time taken to solve"
+        help="record details such as time, contacts, variables and clauses for a solving an encoding"
     )
     parser.add_argument(
         "-n", "--new",
