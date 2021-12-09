@@ -14,6 +14,7 @@ INPUT_DIR = "./input"
 # Ignore these inputs
 IGNORE: list[str] = []
 
+
 def main() -> None:
     args = parse_args()
     dimension = args.dimension
@@ -25,7 +26,6 @@ def main() -> None:
     for sequence in sequences:
         print(sequence)
     run_tests(sequences, dimension, encoding_type)
-    return
 
 
 def get_sequences(input_dir_name: str, seq_type: str, min_len: int, max_len: int) -> list[dict[str, str]]:
@@ -49,7 +49,10 @@ def get_sequences(input_dir_name: str, seq_type: str, min_len: int, max_len: int
     return sorted(sequences, key=lambda x: (len(x["string"]), x["filename"]))
 
 
-def is_type(filename, seq_type) -> bool:
+def is_type(filename: str, seq_type: str) -> bool:
+    """
+    Return if a sequence is real, random, or all
+    """
     if seq_type == "all":
         return True
     elif seq_type == "real" and re.match("^[a-zA-Z0-9]{6}$", filename):
@@ -60,6 +63,9 @@ def is_type(filename, seq_type) -> bool:
 
 
 def run_tests(sequences: list[dict], dimension: int, encoding_type: str) -> None:
+    """
+    Run tests for all the given sequences
+    """
     for sequence in sequences:
         filename = sequence["filename"]
         string = sequence["string"]
@@ -70,10 +76,12 @@ def run_tests(sequences: list[dict], dimension: int, encoding_type: str) -> None
             run_test(filename, string, True, dimension)
         if old:
             run_test(filename, string, False, dimension)
-    return
 
 
 def run_test(filename: str, string: str, new: bool, dimension: int) -> None:
+    """
+    Run a single test using the given filename
+    """
     input_file = os.path.join(INPUT_DIR, filename)
     new_flag = "-n" if new else ""
     dims = [2, 3] if dimension == 1 else [dimension]
@@ -89,10 +97,12 @@ def run_test(filename: str, string: str, new: bool, dimension: int) -> None:
         else:
             command = f"python3 encode.py {input_file} -s -t {new_flag} -d {dim}"
     subprocess.run(command.split(), capture_output=False)
-    return
 
 
 def get_seq_len(input_file: str) -> int:
+    """
+    Given a file to a sequence, return the length of the sequence
+    """
     with open(input_file) as f:
         return len(f.readline().removesuffix("\n"))
 

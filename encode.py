@@ -17,19 +17,17 @@ def main() -> None:
     dimension = args.dimension
     new = args.new
 
-    if args.solve and args.time:
-        print("Attempting to time and solve\n")
+    if args.solve and args.track:
+        print("Attempting to solve and time\n")
         timed_solve(input_file, dimension, new)
     elif args.solve:
         print("Attempting to solve\n")
-        max_contacts = solve(input_file, dimension, new)
-        print(f"Max contacts: {max_contacts}")
+        print(f"Max contacts: {solve(input_file, dimension, new)}")
     else:
         print("Attempting to encode\n")
-        file_path = encode(input_file, goal_contacts, dimension, new, args.time)
+        file_path = encode(input_file, goal_contacts, dimension, new, args.track)
         print(f"Encoding bul    : {file_path.replace('cnf', 'bul')}")
         print(f"Encoding kissat : {file_path}")
-    return
 
 
 def timed_solve(input_file: str, dimension: int, new: bool) -> None:
@@ -43,17 +41,12 @@ def timed_solve(input_file: str, dimension: int, new: bool) -> None:
 
     with open(results_file, "w+") as f:
         f.write("length,time,contacts,variables,clauses\n")
-
     for _ in range(TEST_REPEATS):
-        result = solve(input_file, dimension, new)
-        max_contacts = result["max_contacts"]
-        duration = result["duration"]
+        r = solve(input_file, dimension, new)
         vars, clauses = get_num_vars_and_clauses(filename, new)
         print(results_file)
-
         with open(results_file, "a") as f:
-            f.write(f"{length},{duration},{max_contacts},{vars},{clauses}\n")
-    return
+            f.write(f"{length},{r['duration']},{r['max_contacts']},{vars},{clauses}\n")
 
 
 def solve(input_file: str, dimension: int, new: bool) -> dict[str, float]:
@@ -67,14 +60,12 @@ def solve(input_file: str, dimension: int, new: bool) -> dict[str, float]:
     goal_contacts = 1
     max_contacts = get_max_contacts(get_sequence(input_file))
     total_duration = 0.0
-    print("Start doubling")
-    print(f"{max_contacts = }")
+    print(f"Start doubling until {max_contacts = }")
     while goal_contacts <= max_contacts:
         print(f"Solving {goal_contacts}: ", end="", flush=True)
         duration = solve_sat(input_file, goal_contacts, dimension, new)
         total_duration += abs(duration)
-        solved = duration > 0
-        if not solved:
+        if 0 >= duration:
             break
         goal_contacts *= 2
     print(f"Failed to solve at {goal_contacts}\n")
@@ -85,23 +76,16 @@ def solve(input_file: str, dimension: int, new: bool) -> dict[str, float]:
     goal_contacts = (hi + lo) // 2
     print("Start binary search to max contacts")
     while lo <= hi and goal_contacts <= max_contacts:
-        # Find the number of contacts
         goal_contacts = (hi + lo) // 2
-
-        # Attempt to solve
         print(f"Solving {goal_contacts}:", end=" ")
         duration = solve_sat(input_file, goal_contacts, dimension, new)
         total_duration += abs(duration)
-        solved = duration > 0
-        print(solved)
-
-        if solved:
+        if duration > 0:
             max_contacts = max(max_contacts, goal_contacts)
             lo = goal_contacts + 1
         else:
             hi = goal_contacts - 1
     print()
-
     return {
         "max_contacts": max_contacts,
         "duration": total_duration,
@@ -116,9 +100,8 @@ def solve_sat(input_file: str, goal_contacts: int, dimension: int, new: bool) ->
     file_path = encode(input_file, goal_contacts, dimension, new)
     command = f"kissat {file_path} -q"
     start = time.time()
-    result = subprocess.run(command.split(), capture_output=True)
+    output = str(subprocess.run(command.split(), capture_output=True).stdout)
     duration = time.time() - start
-    output = str(result.stdout)
     if "UNSAT" in output:
         print("UNSAT")
         return -duration
@@ -129,7 +112,7 @@ def solve_sat(input_file: str, goal_contacts: int, dimension: int, new: bool) ->
     return 0
 
 
-def encode(input_file: str, goal_contacts: int, dimension: int, new: bool, timed: bool = False) -> str:
+def encode(input_file: str, goal_contacts: int, dimension: int, new: bool, tracked: bool = False) -> str:
     """
     Generate bule encoding for a protein sequence and write it to a file in
     the models folder, returning the path to the file
@@ -145,40 +128,30 @@ def encode(input_file: str, goal_contacts: int, dimension: int, new: bool, timed
 
     # Number of contacts = adjacent "1"s minus offset
     with open(in_file, "w+") as f:
-        # Write sequence string
         f.write(f"% {sequence}\n\n")
 
-        # Write logical encoding of sequence
         f.write(f"% sequence\n")
-        # f.write(f"sequence[0..{n - 1}].\n")
         for i, c in enumerate(sequence):
             f.write(f"#ground sequence[{i}, {c}].\n")
-        f.write("\n")
 
-        # Write width
-        f.write("% width\n")
+        f.write("\n% width\n")
         f.write(f"#ground width[{w}].\n\n")
 
-        # Write goal contacts
         f.write(f"% Base contacts {base_goal}\n")
         f.write(f"% Goal contacts {goal_contacts}\n")
         f.write(f"#ground goal[{(base_goal + goal_contacts)}].\n\n")
 
     bule_files_list = [
         f"bule/constraints_{dimension}d_{encoding_version}.bul",
-        "bule/cc_a.bul" if not new else "bule/s_tot.bul"  # For some reason new encoding does not work with cca
+        "bule/cc_a.bul"
     ]
 
     bule_files = " ".join(bule_files_list)
     out_file = f"models/cnf/{file_name}_{encoding_version}.cnf"
     command = f"bule2 --output dimacs {bule_files} {in_file} > {out_file}"
-    # command = f"bule2 --output qdimacs {bule_files} {in_file} | sed '2d' > {out_file}"
-    # command = f"bule2 {bule_files} {in_file} | grep -v exists > {out_file}"
-    # bule2 --solve true --solver kissat  bule/constraints_2d_old.bul bule/s_tot.bul models/gen_length_6_1.bul
     subprocess.run(command, shell=True)
-    # print(out_file)
 
-    if timed:
+    if tracked:
         results_file = f"results/{file_name}_{dimension}d_{encoding_version}.csv"
         print(results_file)
         with open(results_file, "w+") as f:
@@ -195,8 +168,7 @@ def get_num_vars_and_clauses(filename: str, new: bool) -> tuple[int, int]:
     """
     encoding_version = "new" if new else "old"
     with open(f"models/cnf/{filename}_{encoding_version}.cnf") as f:
-        line = f.readline()
-        return tuple(map(int, line.split()[-2:]))
+        return tuple(map(int, f.readline().split()[-2:]))
 
 
 def get_sequence(input_file: str) -> str:
@@ -204,19 +176,14 @@ def get_sequence(input_file: str) -> str:
     Read the input file and return the string sequence of 1s and 0s
     """
     with open(input_file, "r") as f:
-        sequence = f.readline()[:-1]  # Ignore last "\n"
-    return sequence
+        return f.readline().removesuffix("\n")
 
 
-def get_adjacent_ones(sequence: str) -> int:
+def get_adjacent_ones(s: str) -> int:
     """
     Return the number of adjacent ones that are in the string
     """
-    count = 0
-    for i in range(len(sequence) - 1):
-        if sequence[i] == "1" and sequence[i + 1] == "1":
-            count += 1
-    return count
+    return [s[i] == s[i+1] == "1" for i in range(len(s)-1)].count(True)
 
 
 def get_grid_diameter(dimension: int, n: int) -> int:
@@ -233,19 +200,12 @@ def get_grid_diameter(dimension: int, n: int) -> int:
         return 2 + n // 4
 
 
-def get_max_contacts(sequence: str) -> int:
+def get_max_contacts(s: str) -> int:
     """
     Find the maximum number of contacts that the sequence can have
     """
-    total = 0
-    n = len(sequence)
-    print(sequence)
-    for i in range(n - 1):
-        if sequence[i] == "1":
-            for j in range(i + 3, n, 2):
-                if sequence[j] == "1":
-                    total += 1
-    return total
+    n = len(s)
+    return sum([s[i+3:n:2].count("1") for i in range(n-3) if s[i] == "1"])
 
 
 def parse_args() -> argparse.Namespace:
