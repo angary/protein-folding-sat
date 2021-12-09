@@ -55,7 +55,7 @@ non_adj_one[I, J], dim[D], pos[P],  pos[P + 1], ~pos[P - 1] ::  x(I, P, D) & ~x(
 non_adj_one[I, J], dim[D], pos[P], ~pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P - 1, D) -> ~next(I, J, D).
 
 % f I and J are next to each other then there is a contact
-non_adj_one[I, J], I + 2 < J, J - I #mod 2 == 1 :: #ground potential_contact[I, J].
+non_adj_one[I, J], I + 2 < J, J - I #mod 2 == 1 :: #ground potential_contact[I, J]. % DOUBLE CHECK (I + 2 < J)
 potential_contact[I, J] :: #exists[0] var(contact(I, J)).
 potential_contact[I, J] :: #hide ~var(contact(I, J)).
 % Only condition for contact if Next in D1 and same in D2
