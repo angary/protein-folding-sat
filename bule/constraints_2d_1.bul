@@ -2,7 +2,6 @@
 
 % Generate the grid from the width
 width[W] :: #ground pos[0 .. W - 1].
-#ground dim[0 .. 1].
 
 % Ensuring Legal Embeddings
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -38,8 +37,8 @@ adj[I, J], dim[D], pos[P],  pos[P + 1], ~pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1
 adj[I, J], dim[D], pos[P], ~pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P - 1, D) -> ~direction(I, J, D).
 
 adj[I, J] :: dim[D] : direction(I, J, D). % I and I + 1 has to be different in at least one dimension
-adj[I, J], dim[D1], dim[D2], D1 != D2 :: direction(I, J, D1) -> same(I, J, D2). % If it is different in one dimension, it has to be same in the others
-adj[I, J], dim[D] :: same(I, J, D) -> ~direction(I, J, D). % If it is the same in one dimension, it cannot be direction in the same dimension
+adj[I, J], dim[D1], dim[D2], D1 != D2 :: direction(I, J, D1) -> same(I, J, D2). % If different in one dimension, it has to be same in the others
+adj[I, J], dim[D] :: same(I, J, D) -> ~direction(I, J, D). % If same in one dimension, has to be different direction in same dimension
 % Can also have a `direction(sequenceI, polarityP, dimensionD)`
 
 % Identifying Potential Contacts
@@ -59,10 +58,10 @@ potential_contact[I, J], dim[D], pos[P], ~pos[P + 1],  pos[P - 1] ::  x(I, P, D)
 potential_contact[I, J] :: #exists[0] var(contact(I, J)).
 potential_contact[I, J] :: #hide ~var(contact(I, J)).
 % Only condition for contact if Next in D1 and same in D2
-potential_contact[I, J], dim[D1] ::  next(I, J, D1) & dim[D2], D1 != D2 : same(I, J, D2) ->  var(contact(I, J)).
-potential_contact[I, J], dim[D1] :: ~next(I, J, D1) & dim[D2], D1 != D2 : same(I, J, D2) -> ~var(contact(I, J)).
+potential_contact[I, J], dim[D1] ::  next(I, J, D1) & dim[D2], D1 != D2 :  same(I, J, D2) ->  var(contact(I, J)).
+potential_contact[I, J], dim[D1] :: ~next(I, J, D1) & dim[D2], D1 != D2 :  same(I, J, D2) -> ~var(contact(I, J)).
 potential_contact[I, J], dim[D1] :: ~next(I, J, D1) & dim[D2], D1 != D2 : ~next(I, J, D2) -> ~var(contact(I, J)).
-potential_contact[I, J], dim[D1], dim[D2], D1 != D2 :: next(I, J, D1) & ~same(I, J, D2) -> ~var(contact(I, J)).
+potential_contact[I, J], dim[D1], dim[D2], D1 != D2 ::  next(I, J, D1) & ~same(I, J, D2) -> ~var(contact(I, J)).
 
 % Counting Potential Contacts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

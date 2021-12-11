@@ -80,13 +80,13 @@ def solve(input_file: str, dim: int, version: int) -> dict[str, float]:
         duration = solve_sat(input_file, goal_contacts, dim, version)
         total_duration += abs(duration)
         if duration > 0:
-            max_contacts = max(max_contacts, goal_contacts)
             lo = goal_contacts + 1
         else:
             hi = goal_contacts - 1
+            goal_contacts -= 1
     print()
     return {
-        "max_contacts": max_contacts,
+        "max_contacts": goal_contacts,
         "duration": total_duration,
     }
 

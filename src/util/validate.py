@@ -12,8 +12,8 @@ MAX_LEN = 20
 INPUT_DIR = "input"
 OUTPUT = "validate.log"
 COMPARE: list[tuple[int, int]] = [
-    (2, 1),
-    (2, 2)
+    (3, 1),
+    (3, 2)
 ]
 
 def main():
