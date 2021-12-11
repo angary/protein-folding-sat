@@ -28,9 +28,15 @@ def main() -> None:
     run_tests(sequences, dimension, encoding_type)
 
 
-def get_sequences(input_dir_name: str, seq_type: str, min_len: int, max_len: int) -> list[dict[str, str]]:
+def get_sequences(
+    input_dir_name: str,
+    seq_type: str,
+    min_len: int = 0,
+    max_len: int = 100
+) -> list[dict[str, str]]:
     """
-    Get a list of the sequences and file names from the input directory
+    Get a list of dictionaries containing sequences and their filename
+    from the input directory
     """
     sequences = []
     for filename in os.listdir(input_dir_name):
