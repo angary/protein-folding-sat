@@ -2,7 +2,6 @@
 # Generates binary sequence files for each file in the Dataset directory
 # These input files can later be used for the HPsat and pipeline programs
 
-import sys
 import os
 
 from pathlib import Path
@@ -102,7 +101,7 @@ def count_contacts(coords: list[list[int]], string: str) -> int:
 
 
 def main(argv: list[str]) -> None:
-    if (len(argv) < 2 or len == 3):
+    if len(argv) <= 3:
         raise Exception("ERROR: Usage\n\tpython3 get_sequences.py {file/directory to read from} {flag (-d(irectory) or -f(ile))} {file type (if flag = -d)}")
     elif len(argv) == 4:
         filter = argv[3]

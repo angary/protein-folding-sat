@@ -1,3 +1,5 @@
+"""Convert from --solve output of the old bule encoding into the new encoding"""
+
 def main1():
     results = []
     with open("temp_new") as f:
@@ -30,8 +32,8 @@ def main1():
                 y = b[4]
                 result.append(f"x({point},c({x},{y}))")
             
-            extras = " ".join(line[len(xs):])
             results.append("  ".join(result) + "\n")
+            # extras = " ".join(line[len(xs):])
             # results.append("  ".join(result) + " " + extras + "\n")
     results.sort()
     for result in results:

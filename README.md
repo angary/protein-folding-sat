@@ -19,27 +19,30 @@ The objective of this project is to examine the HP Model of protein folding unde
 
 ## Setup
 
-| **File**                                     | **Purpose**                                                                                            |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| [gen_rand_sequence.py](gen_rand_sequence.py) | Writes to a file a random string of "0"s and "1"s                                                      |
-| [get_sequences.py](get_sequences.py)         | Reads in the data from the `Dataset` folder and generates file containing "0"s and "1s"                |
-| [encode.py](encode.py)                       | Generates bule2 encoding for a protein. If given the `--solve` flag, finds the max num of contacts     |
-| [run_tests.py](run_tests.py)                 | Go through the input sequences and benchmark the encodings, writing results into the results folder    |
-| [helpers](helpers/)                           | Contains scripts to visualise the protein embedding from clauses / validate new encoding               |
-| [analysis.ipynb](analysis.ipynb)             | Check that the new and old encoding produces the same number of contacts and compare their performance |
+| **File**                         | **Purpose**                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| [bule](bule)                     | Bule2 encodings of the prototein problem, and linear constraints                                       |
+| [input](input)                   | Folder with files that contain protein sequences in the HP model                                       |
+| [models](models)                 | Folder containing the Bule2 and DIMACS CNF format encoding of the inputs                               |
+| [src](src)                       | Folder containing Python scripts for generating encodings and running tests                            |
+| [analysis.ipynb](analysis.ipynb) | Check that the new and old encoding produces the same number of contacts and compare their performance |
+
+Note that some of these folders are not tracked by git due to large sizes.
 
 The project uses the [Bule SAT programming language](https://github.com/vale1410/bule) for generating the encodings, and [kissat](https://github.com/arminbiere/kissat) for solving the encodings.
-
 
 ## Usage
 
 Inside the `input` directory are files, each of which contain a string of 1s and 0s, used to model a protein sequence used in the prototein problem.
 These files are used as inputs for the protein folding problem.
 They can then be encoded in a bule (`.bule`) or DIMACS CNF format (`.cnf`) which contains a problem of solving for a random walk on a sequence that results in a certain number of H-H contacts.
-Running the following command 
+
+Running the following command in the root directory of the project
+
 ```
-python3 encode.py <input_file> -c <contact_count> -d <dimension> 
+python3 -m src.encode <input_file> -c <contact_count> -d <dimension>
 ```
+
 will create a bule encoding inside the `models/bul` directory, and a DIMACS CNF encoding in the `models/cnf` directory.
 
 Adding the `-s` or `--solve` flag will result in a binary search for the maximum number of contacts possible.

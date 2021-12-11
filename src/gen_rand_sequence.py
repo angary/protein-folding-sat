@@ -6,7 +6,6 @@
 
 import os
 import random
-import sys
 
 SEED = 1
 PROB = 2/3
@@ -17,7 +16,6 @@ def main():
     random.seed(SEED)
     for i in range(6, 50):
         gen_sequences(i)
-    return
 
 
 def gen_sequences(length: int):

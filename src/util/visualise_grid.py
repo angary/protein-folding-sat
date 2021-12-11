@@ -1,3 +1,5 @@
+"""Visualise embedding of the protein string on the grid"""
+
 
 def main():
     sequence = input("Enter sequence:\n")
@@ -11,11 +13,10 @@ def main():
     print("=" * (size + 2))
 
 
-def get_grid_from_old():
-    return
-
-
 def get_grid_from_new(sequence: list[str]) -> list[list[str]]:
+    """
+    Return the grid embedding from the new encoding
+    """
     size = max([int(x[4]) for x in sequence]) + 1
     sequence_len = max([int(x[2]) for x in sequence]) + 1
 
@@ -29,6 +30,7 @@ def get_grid_from_new(sequence: list[str]) -> list[list[str]]:
             x, y = y, x
         grid[y][x] = str(i // 2)
     return grid
+
 
 if __name__ == "__main__":
     main()

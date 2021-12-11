@@ -1,4 +1,4 @@
-# Compare produced test results with expected test results
+"""Compare produced test results with expected test results"""
 
 import csv
 import os
@@ -38,7 +38,6 @@ def main():
             expected_contacts  = int(f.readline().split()[-1])
             correct = sequence["contacts"] == expected_contacts
             print(f"Correct result for {sequence['name']}: {correct}")
-    return
 
 
 if __name__ == "__main__":
