@@ -9,19 +9,20 @@ from src.run_tests import get_sequences
 
 INPUT_DIR = "input"
 OUTPUT = "validate.log"
-COMPARE: list[tuple[int, bool]] = [
-    (2, True),
-    (3, True)
+COMPARE: list[tuple[int, int]] = [
+    (2, 1),
+    (2, 2)
 ]
 
 def main():
     for sequence in get_sequences(INPUT_DIR, "all", max_len=20):
         filename = os.path.join(INPUT_DIR, sequence["filename"])
         results = []
-        for dim, new in COMPARE:
-            encode(filename, 1, dim, new)
-            v, c = get_num_vars_and_clauses(sequence["filename"], new)
-            r = solve(filename, dim, new)
+        for dim, version in COMPARE:
+            output = encode(filename, 1, dim, version)
+            print(output)
+            v, c = get_num_vars_and_clauses(sequence["filename"], version)
+            r = solve(filename, dim, version)
             results += [[v, c, r["max_contacts"], r["duration"]]]
         result_str = "\n".join(list(map(str,results)))
         with open(OUTPUT, "a") as f:

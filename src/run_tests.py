@@ -5,13 +5,11 @@ import argparse
 import os
 import re
 import subprocess
-
 from datetime import datetime
 
 MAX_LEN = 30
 INPUT_DIR = "./input"
-
-# Ignore these inputs
+VERSIONS: list[int] = [0, 1, 2]
 IGNORE: list[str] = []
 
 
@@ -19,13 +17,13 @@ def main() -> None:
     args = parse_args()
     dimension = args.dimension
     seq_type = args.type
-    encoding_type = args.encoding_type
+    version = args.version
     min_len = args.min_len
 
     sequences = get_sequences(INPUT_DIR, seq_type, min_len, MAX_LEN)
     for sequence in sequences:
         print(sequence)
-    run_tests(sequences, dimension, encoding_type)
+    run_tests(sequences, dimension, version)
 
 
 def get_sequences(
@@ -68,7 +66,7 @@ def is_type(filename: str, seq_type: str) -> bool:
     return False
 
 
-def run_tests(sequences: list[dict], dimension: int, encoding_type: str) -> None:
+def run_tests(sequences: list[dict], dimension: int, version: int) -> None:
     """
     Run tests for all the given sequences
     """
@@ -76,32 +74,29 @@ def run_tests(sequences: list[dict], dimension: int, encoding_type: str) -> None
         filename = sequence["filename"]
         string = sequence["string"]
 
-        new = False if encoding_type == "old" else True
-        old = False if encoding_type == "new" else True
-        if new:
-            run_test(filename, string, True, dimension)
-        if old:
-            run_test(filename, string, False, dimension)
+        run_test(filename, string, version, dimension)
 
 
-def run_test(filename: str, string: str, new: bool, dimension: int) -> None:
+def run_test(filename: str, string: str, version: int, dimension: int) -> None:
     """
     Run a single test using the given filename
     """
     input_file = os.path.join(INPUT_DIR, filename)
-    new_flag = "-n" if new else ""
     dims = [2, 3] if dimension == 1 else [dimension]
     seq_len = get_seq_len(input_file)
 
-    for dim in dims:
-        curr_time = datetime.now().strftime("%H:%M:%S")
-        print(f"Testing {input_file}: \t{string} \t{new = } \t{dim = } {curr_time}")
+    if version == -1:
+        versions = VERSIONS
+    else:
+        versions = [version]
+    for v in versions:
+        for dim in dims:
+            curr_time = datetime.now().strftime("%H:%M:%S")
+            print(f"Testing {input_file}: \t{string} \t{version = } \t{dim = } {curr_time}")
 
-        # We do not solve using the old encoding if 3D and len > 13
-        if dim == 3 and seq_len >= 13 and not new:
-            command = f"python3 encode.py {input_file} -t {new_flag} -d {dim}"
-        else:
-            command = f"python3 encode.py {input_file} -s -t {new_flag} -d {dim}"
+            # We do not solve using the old encoding if 3D and len > 13
+            solve = "" if dim == 3 and seq_len >= 13 and v == 0 else "-s"
+            command = f"python3 encode.py {input_file} {solve} -t -v {v} -d {dim}"
     subprocess.run(command.split(), capture_output=False)
 
 
@@ -126,9 +121,9 @@ def parse_args() -> argparse.Namespace:
         help="the type of protein sequences to test, default value: all"
     )
     parser.add_argument(
-        "-e", "--encoding-type",
-        nargs="?", type=str, default="both", choices={"both", "old", "new"},
-        help="the encoding type to test, default: new and old"
+        "-v", "--version",
+        nargs="?", type=int, default=-1, choices=set(VERSIONS),
+        help="the encoding type to test, default: all"
     )
     parser.add_argument(
         "-m", "--min-len",

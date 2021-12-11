@@ -67,7 +67,7 @@ sequence[I, 0], sequence[I + 1, 1], accumulate[I, J] :: #ground accumulate[I + 1
 sequence[I, 1], sequence[I + 1, 0], accumulate[I, J] :: #ground accumulate[I + 1, J].
 sequence[I, 1], sequence[I + 1, 1], accumulate[I, J] :: #ground accumulate[I + 1, J + 1].
 
-% Want to determine how many 
+% Want to determine how many adjacent ones there are
 accumulate[I, J], ~sequence[I + 1, 0], ~sequence[I + 1, 1] :: #ground base_contacts[J].
 
 % Total number of contacts should be C
