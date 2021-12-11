@@ -16,7 +16,7 @@ sequence[I, B], pos[P], dim[D] :: #hide ~x(I, P, D).
 sequence[I, B], dim[D] :: pos[P] : x(I, P, D).  % TODO: Have new encoding for at least in position P (order encoding)
 
 % No character-position in the sequence can be assigned to more than one point
-sequence[I, B], dim[D], pos[P], pos[Q], P < Q :: ~x(I, P, D) | ~x(I, Q, D).
+sequence[I, B], dim[D], pos[P1], pos[P2], P1 < P2 :: ~x(I, P1, D) | ~x(I, P2, D).
 
 % No point in the grid can have more than one character-position assigned to it AKA two sequences cannot be on the same point
 sequence[I, B], sequence[J, C], I < J :: #ground different[I, J]. 
@@ -36,6 +36,7 @@ adj[I, J], dim[D], pos[P],  pos[P - 1] ::  x(I, P, D) &  x(J, P - 1, D) ->  dire
 adj[I, J], dim[D], pos[P],  pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) & ~x(J, P - 1, D) -> ~direction(I, J, D).
 adj[I, J], dim[D], pos[P],  pos[P + 1], ~pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) -> ~direction(I, J, D).
 adj[I, J], dim[D], pos[P], ~pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P - 1, D) -> ~direction(I, J, D).
+
 adj[I, J] :: dim[D] : direction(I, J, D). % I and I + 1 has to be different in at least one dimension
 adj[I, J], dim[D1], dim[D2], D1 != D2 :: direction(I, J, D1) -> same(I, J, D2). % If it is different in one dimension, it has to be same in the others
 adj[I, J], dim[D] :: same(I, J, D) -> ~direction(I, J, D). % If it is the same in one dimension, it cannot be direction in the same dimension
@@ -43,19 +44,18 @@ adj[I, J], dim[D] :: same(I, J, D) -> ~direction(I, J, D). % If it is the same i
 
 % Identifying Potential Contacts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-sequence[I, 1], sequence[J, 1], I + 2 < J :: #ground non_adj_one[I, J].
-non_adj_one[I, J], dim[D] :: #exists[0] next(I, J, D).
-non_adj_one[I, J], dim[D] :: #hide next(I, J, D), ~next(I, J, D).
+sequence[I, 1], sequence[J, 1], I + 2 < J, J - I #mod 2 == 1 :: #ground potential_contact[I, J].
+potential_contact[I, J], dim[D] :: #exists[0] next(I, J, D).
+potential_contact[I, J], dim[D] :: #hide next(I, J, D), ~next(I, J, D).
 
 % If I and J are adjacent in one dir and not the others, they are next to each other
-non_adj_one[I, J], dim[D], pos[P], pos[P + 1] :: x(I, P, D) & x(J, P + 1, D) -> next(I, J, D).
-non_adj_one[I, J], dim[D], pos[P], pos[P - 1] :: x(I, P, D) & x(J, P - 1, D) -> next(I, J, D).
-non_adj_one[I, J], dim[D], pos[P],  pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) & ~x(J, P - 1, D) -> ~next(I, J, D).
-non_adj_one[I, J], dim[D], pos[P],  pos[P + 1], ~pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) -> ~next(I, J, D).
-non_adj_one[I, J], dim[D], pos[P], ~pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P - 1, D) -> ~next(I, J, D).
+potential_contact[I, J], dim[D], pos[P], pos[P + 1] :: x(I, P, D) & x(J, P + 1, D) -> next(I, J, D).
+potential_contact[I, J], dim[D], pos[P], pos[P - 1] :: x(I, P, D) & x(J, P - 1, D) -> next(I, J, D).
+potential_contact[I, J], dim[D], pos[P],  pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) & ~x(J, P - 1, D) -> ~next(I, J, D).
+potential_contact[I, J], dim[D], pos[P],  pos[P + 1], ~pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) -> ~next(I, J, D).
+potential_contact[I, J], dim[D], pos[P], ~pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P - 1, D) -> ~next(I, J, D).
 
 % f I and J are next to each other then there is a contact
-non_adj_one[I, J], I + 2 < J, J - I #mod 2 == 1 :: #ground potential_contact[I, J]. % DOUBLE CHECK (I + 2 < J)
 potential_contact[I, J] :: #exists[0] var(contact(I, J)).
 potential_contact[I, J] :: #hide ~var(contact(I, J)).
 % Only condition for contact if Next in D1 and same in D2

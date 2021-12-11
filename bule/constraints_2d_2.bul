@@ -29,8 +29,6 @@ different[I, J] :: dim[D] : ~same(I, J, D).
 
 % Every adjacent pair of character positions must be placed on adjacent points in the grid
 sequence[I, B], sequence[I + 1, C] :: #ground adj[I, I + 1].
-adj[I, J], dim[D] :: #exists[0] direction(I, J, D).
-adj[I, J], dim[D] :: #hide direction(I, J, D),  ~direction(I, J, D).
 
 % Identifying Potential Contacts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
