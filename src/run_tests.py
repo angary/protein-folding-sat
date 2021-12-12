@@ -15,15 +15,9 @@ IGNORE: list[str] = []
 
 def main() -> None:
     args = parse_args()
-    dimension = args.dimension
-    seq_type = args.type
-    version = args.version
-    min_len = args.min_len
-
-    sequences = get_sequences(INPUT_DIR, seq_type, min_len, MAX_LEN)
-    for sequence in sequences:
-        print(sequence)
-    run_tests(sequences, dimension, version)
+    for s in get_sequences(INPUT_DIR, args.type, args.min_len, MAX_LEN):
+        print(s)
+        run_test(s["filename"], s["string"], args.version, args.dimension)
 
 
 def get_sequences(
@@ -43,11 +37,7 @@ def get_sequences(
 
         filepath = os.path.join(input_dir_name, filename)
         with open(filepath) as f:
-            sequence = f.read()[:-1]
-            sequences.append({
-                "filename": filename,
-                "string": sequence
-            })
+            sequences.append({"filename": filename, "string": f.read().removesuffix("\n")})
     # Sort sequence by shortest sequence first
     sequences = [s for s in sequences if len(s["string"]) >= min_len and len(s["string"]) < max_len]
     return sorted(sequences, key=lambda x: (len(x["string"]), x["filename"]))
@@ -66,46 +56,26 @@ def is_type(filename: str, seq_type: str) -> bool:
     return False
 
 
-def run_tests(sequences: list[dict], dimension: int, version: int) -> None:
-    """
-    Run tests for all the given sequences
-    """
-    for sequence in sequences:
-        filename = sequence["filename"]
-        string = sequence["string"]
-
-        run_test(filename, string, version, dimension)
-
-
 def run_test(filename: str, string: str, version: int, dimension: int) -> None:
     """
     Run a single test using the given filename
     """
     input_file = os.path.join(INPUT_DIR, filename)
     dims = [2, 3] if dimension == 1 else [dimension]
-    seq_len = get_seq_len(input_file)
+    versions = VERSIONS if version == -1 else [version]
+    with open(input_file) as f:
+        seq_len = len(f.readline().removesuffix("\n"))
 
-    if version == -1:
-        versions = VERSIONS
-    else:
-        versions = [version]
-    for v in versions:
-        for dim in dims:
+    for dim in dims:
+        for v in versions:
             curr_time = datetime.now().strftime("%H:%M:%S")
-            print(f"Testing {input_file}: \t{string} \t{version = } \t{dim = } {curr_time}")
+            print(f"Testing {input_file}: \t{string} \t{v = } \t{dim = } {curr_time}")
 
             # We do not solve using the old encoding if 3D and len > 13
             solve = "" if dim == 3 and seq_len >= 13 and v == 0 else "-s"
-            command = f"python3 encode.py {input_file} {solve} -t -v {v} -d {dim}"
-    subprocess.run(command.split(), capture_output=False)
 
-
-def get_seq_len(input_file: str) -> int:
-    """
-    Given a file to a sequence, return the length of the sequence
-    """
-    with open(input_file) as f:
-        return len(f.readline().removesuffix("\n"))
+            command = f"python3 -m src.encode {input_file} {solve} -t -v {v} -d {dim}"
+            subprocess.run(command.split(), capture_output=True)
 
 
 def parse_args() -> argparse.Namespace:

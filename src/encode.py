@@ -26,7 +26,7 @@ def main() -> None:
     else:
         print("Attempting to encode\n")
         file_path = encode(input_file, goal_contacts, dimension, version, True)
-        print(f"Encoding bul    : {file_path.replace('cnf', 'bul')}")
+        print(f"Encoding bul    : {file_path.replace('.cnf', '.bul')}")
         print(f"Encoding kissat : {file_path}")
 
 
@@ -36,7 +36,7 @@ def timed_solve(input_file: str, dim: int, version: int) -> None:
     """
     length = len(get_sequence(input_file))
     filename = input_file.split("/")[-1]
-    results_file = f"results/{filename}_{dim}d_{version}.csv"
+    results_file = f"results/{filename}_{dim}d_v{version}.csv"
 
     with open(results_file, "w+") as f:
         f.write("length,time,contacts,variables,clauses\n")
@@ -123,7 +123,6 @@ def encode(
     the models folder, returning the path to the file
     """
     file_name = input_file.split("/")[-1]
-
     sequence = get_sequence(input_file)
     base_goal = get_adjacent_ones(sequence)
     n = len(sequence)
@@ -146,7 +145,7 @@ def encode(
         f.write(f"#ground dim[0 .. {dim - 1}].\n")
 
     # TODO: Remove dimension from new encodings
-    bule_files = f"bule/constraints_{dim}d_{version}.bul bule/cc_a.bul"
+    bule_files = f"{get_encoding_file(dim, version)} bule/cc_a.bul"
     out_file = f"models/cnf/{file_name}_{version}.cnf"
     command = f"bule2 --output dimacs {bule_files} {in_file} > {out_file}"
     subprocess.run(command, shell=True)
@@ -161,10 +160,19 @@ def encode(
     return out_file
 
 
+def get_encoding_file(dim: int, version: int) -> str:
+    """
+    Returns the path to the encoding with the specified dimensiona and version
+    """
+    if version > 0:
+        return f"bule/constraints_{version}.bul"
+    return f"bule/constraints_{dim}d_0.bul"
+
+
 def get_num_vars_and_clauses(filename: str, version: int) -> tuple[int, int]:
     """
     Given the name of the input, return the number of variables and
-    clauses in the encoding
+    clauses in the encoding by reading it from the DIMACS cnf encoded file
     """
     with open(f"models/cnf/{filename}_{version}.cnf") as f:
         return tuple(map(int, f.readline().split()[-2:]))
@@ -193,10 +201,9 @@ def get_grid_diameter(dim: int, n: int) -> int:
         if n >= 12:
             return 1 + n // 4
         return n
-    else:
-        if n >= 20:
-            return 2 + n // 8
-        return 2 + n // 4
+    if n >= 20:
+        return 2 + n // 8
+    return 2 + n // 4
 
 
 def get_max_contacts(s: str) -> int:
