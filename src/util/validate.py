@@ -10,14 +10,14 @@ from src.encode import encode, get_num_vars_and_clauses, solve_binary, \
 from src.run_tests import get_sequences
 
 MIN_LEN = 0
-MAX_LEN = 20
+MAX_LEN = 23
 INPUT_DIR = "input"
 OUTPUT = "validate.log"
 
 # List containing tuple of [dimension, version] of the encodings to compare
 ENCODINGS: list[tuple[int, int]] = [
     (2, 1),
-    (2, 2)
+    # (2, 2)
 ]
 
 # List containing functions of the different search methods to compare
@@ -80,7 +80,7 @@ def main():
             with open(OUTPUT, "a") as f:
                 f.write(f"{filename}\nFunction, Duration, contacts\n")
                 f.write("\n".join(list(map(str, results))) + "\n")
-                f.write("Same num of contacts: " + str(len(set(list(zip(*results))[2])) == 1) + "\n\n")
+                f.write(f"Same num of contacts: {len(set(list(zip(*results))[2])) == 1}\n\n")
     
     if COMPARE_ENCODINGS:
         with open(OUTPUT, "a") as f:

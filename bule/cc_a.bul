@@ -55,8 +55,10 @@ cca_aux[V,I,K], K > 0, order_range[V,J], 0 <= J <= K-1 :: #exists[0] var(cca(V,c
 cca_aux[V,I,K], K > 0, order_range[V,J], 0 <= J <= K-1 :: #hide var(cca(V,z,I+J,K)), ~var(cca(V,z,I+J,K)).
 cca_aux[V,I,K], K > 0, order_range[V,J], 0 <= J <= K-1 :: #hide var(cca(V,c,I+J,K)), ~var(cca(V,c,I+J,K)).
 
-cca_start[V,K], order_range[V,I], I <= K-1,  bitSet[cca(V),I] ::  var(cca(V,z,I,K)).
-cca_start[V,K], order_range[V,I], I <= K-1, ~bitSet[cca(V),I] :: ~var(cca(V,z,I,K)).
+% TODO: Modify this so that at least works
+% cca_start[V,K], order_range[V,I], I <= K-1,  bitSet[cca(V),I] ::  var(cca(V,z,I,K)).
+% cca_start[V,K], order_range[V,I], I <= K-1, ~bitSet[cca(V),I] :: ~var(cca(V,z,I,K)).
+cca_start[V,K], order_range[V,I], I <= K-1, bitSet[cca(V),I] :: var(cca(V,z,I,K)) | order_range[V, J], I < J <= K-1, ~bitSet[cca(V), J] : var(cca(V,z,J,K)).
 
 % log_leq
 %%% Input:  `logEnc[V,N]` where `V` is a name and `N` is an integer to be encoded in binary.

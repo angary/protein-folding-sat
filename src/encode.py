@@ -37,7 +37,7 @@ def timed_solve(input_file: str, dim: int, version: int) -> None:
     with open(results_file, "w+") as f:
         f.write("length,time,contacts,variables,clauses\n")
     for _ in range(TEST_REPEATS):
-        r = solve_binary_binary(input_file, dim, version)
+        r = solve_binary(input_file, dim, version)
         vars, clauses = get_num_vars_and_clauses(filename, version)
         print(results_file)
         with open(results_file, "a") as f:
