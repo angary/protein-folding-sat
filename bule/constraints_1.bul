@@ -1,4 +1,6 @@
-% bule2 --solve --models 0 constraints.bul models/
+% Parameter for enforcing if diferent in one dimension, same in others, comment to disable
+% TOOD: move parameters into seperate config file
+#ground enforce_same.
 
 % Generate the grid from the width
 width[W] :: #ground pos[0 .. W - 1].
@@ -15,7 +17,7 @@ sequence[I, B], pos[P], dim[D] :: #hide ~x(I, P, D).
 sequence[I, B], dim[D] :: pos[P] : x(I, P, D).  % TODO: Have new encoding for at least in position P (order encoding)
 
 % No character-position in the sequence can be assigned to more than one point
-sequence[I, B], dim[D], pos[P1], pos[P2], P1 < P2 :: ~x(I, P1, D) | ~x(I, P2, D).
+sequence[I, B], dim[D], pos[P], pos[Q], P < Q :: ~x(I, P, D) | ~x(I, Q, D).
 
 % No point in the grid can have more than one character-position assigned to it AKA two sequences cannot be on the same point
 sequence[I, B], sequence[J, C], I < J :: #ground different[I, J]. 
@@ -27,32 +29,25 @@ different[I, J], dim[D], pos[P] ::  x(I, P, D) & ~x(J, P, D) -> ~same(I, J, D).
 different[I, J] :: dim[D] : ~same(I, J, D).
 
 % Every adjacent pair of character positions must be placed on adjacent points in the grid
+sequence[I, 1], sequence[J, 1], J - I #mod 2 == 1, I + 2 < J :: #ground potential_contact[I, J].
 sequence[I, B], sequence[I + 1, C] :: #ground adj[I, I + 1].
-adj[I, J], dim[D] :: #exists[0] direction(I, J, D).
-adj[I, J], dim[D] :: #hide direction(I, J, D),  ~direction(I, J, D).
-adj[I, J], dim[D], pos[P],  pos[P + 1] ::  x(I, P, D) &  x(J, P + 1, D) ->  direction(I, J, D).
-adj[I, J], dim[D], pos[P],  pos[P - 1] ::  x(I, P, D) &  x(J, P - 1, D) ->  direction(I, J, D).
-adj[I, J], dim[D], pos[P],  pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) & ~x(J, P - 1, D) -> ~direction(I, J, D).
-adj[I, J], dim[D], pos[P],  pos[P + 1], ~pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) -> ~direction(I, J, D).
-adj[I, J], dim[D], pos[P], ~pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P - 1, D) -> ~direction(I, J, D).
+potential_contact[I, J] :: #ground adj_or_pc[I, J].
+adj[I, J] :: #ground adj_or_pc[I, J].
+adj_or_pc[I, J], dim[D] :: #exists[0] next(I, J, D).
+adj_or_pc[I, J], dim[D] :: #hide next(I, J, D), ~next(I, J, D).
 
-adj[I, J] :: dim[D] : direction(I, J, D). % I and I + 1 has to be different in at least one dimension
-adj[I, J], dim[D1], dim[D2], D1 != D2 :: direction(I, J, D1) -> same(I, J, D2). % If different in one dimension, it has to be same in the others
-adj[I, J], dim[D] :: same(I, J, D) -> ~direction(I, J, D). % If same in one dimension, has to be different direction in same dimension
-% Can also have a `direction(sequenceI, polarityP, dimensionD)`
+% If I and J are adjacent in one dir and not the others, they are next to each other
+adj_or_pc[I, J], dim[D], pos[P], pos[P + 1] :: x(I, P, D) & x(J, P + 1, D) -> next(I, J, D).
+adj_or_pc[I, J], dim[D], pos[P], pos[P - 1] :: x(I, P, D) & x(J, P - 1, D) -> next(I, J, D).
+adj_or_pc[I, J], dim[D], pos[P] ::  x(I, P, D) & pos[P + 1] : ~x(J, P + 1, D) & pos[P - 1] : ~x(J, P - 1, D) -> ~next(I, J, D).
+
+adj[I, J] :: dim[D] : next(I, J, D). % I and I + 1 has to be different in at least one dimension
+% Enforce same
+enforce_same, adj[I, J], dim[D1], dim[D2], D1 != D2 :: next(I, J, D1) -> same(I, J, D2). % If different in one dimension, it has to be same in the others 
+adj[I, J], dim[D] :: same(I, J, D) -> ~next(I, J, D). % If same in one dimension, has to be different direction in same dimension
 
 % Identifying Potential Contacts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-sequence[I, 1], sequence[J, 1], I + 2 < J, J - I #mod 2 == 1 :: #ground potential_contact[I, J].
-potential_contact[I, J], dim[D] :: #exists[0] next(I, J, D).
-potential_contact[I, J], dim[D] :: #hide next(I, J, D), ~next(I, J, D).
-
-% If I and J are adjacent in one dir and not the others, they are next to each other
-potential_contact[I, J], dim[D], pos[P], pos[P + 1] :: x(I, P, D) & x(J, P + 1, D) -> next(I, J, D).
-potential_contact[I, J], dim[D], pos[P], pos[P - 1] :: x(I, P, D) & x(J, P - 1, D) -> next(I, J, D).
-potential_contact[I, J], dim[D], pos[P],  pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) & ~x(J, P - 1, D) -> ~next(I, J, D).
-potential_contact[I, J], dim[D], pos[P],  pos[P + 1], ~pos[P - 1] ::  x(I, P, D) & ~x(J, P + 1, D) -> ~next(I, J, D).
-potential_contact[I, J], dim[D], pos[P], ~pos[P + 1],  pos[P - 1] ::  x(I, P, D) & ~x(J, P - 1, D) -> ~next(I, J, D).
 
 % f I and J are next to each other then there is a contact
 potential_contact[I, J] :: #exists[0] var(contact(I, J)).
@@ -72,7 +67,7 @@ sequence[I, 0], sequence[I + 1, 1], accumulate[I, J] :: #ground accumulate[I + 1
 sequence[I, 1], sequence[I + 1, 0], accumulate[I, J] :: #ground accumulate[I + 1, J].
 sequence[I, 1], sequence[I + 1, 1], accumulate[I, J] :: #ground accumulate[I + 1, J + 1].
 
-% Want to determine how many 
+% Want to determine how many adjacent ones there are
 accumulate[I, J], ~sequence[I + 1, 0], ~sequence[I + 1, 1] :: #ground base_contacts[J].
 
 % Total number of contacts should be C

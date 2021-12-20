@@ -9,7 +9,7 @@ from datetime import datetime
 
 MAX_LEN = 30
 INPUT_DIR = "./input"
-VERSIONS: list[int] = [0, 1, 2]
+VERSIONS: list[int] = [0, 1]
 IGNORE: list[str] = []
 
 
