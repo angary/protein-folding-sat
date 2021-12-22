@@ -152,10 +152,6 @@ temp*
 models/*
 !models/**/*.gitkeep
 
-# Input folder
-input/*
-!input/**/*.gitkeep
-
 # Dataset folder from zip
 Dataset/
 
