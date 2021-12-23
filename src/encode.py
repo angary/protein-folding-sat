@@ -53,9 +53,9 @@ def solve_binary(input_file: str, dim: int, version: int) -> dict[str, float]:
     total_duration = 0.0
     # Binary search to the maximum possible value
     lo = 0
-    hi = get_max_contacts(get_sequence(input_file))
+    hi = get_max_contacts(get_sequence(input_file), dim)
     goal_contacts = (hi + lo) // 2
-    print("Start binary search to max contacts")
+    print(f"Start binary search to max contacts from {hi = }")
     while lo <= hi:
         goal_contacts = (hi + lo) // 2
         print(f"Solving {goal_contacts}:", end=" ")
@@ -78,7 +78,7 @@ def solve_binary_linear(input_file: str, dim: int, version: int) -> dict[str, fl
     """
     # Double goal_contacts until it is unsolvable
     goal_contacts = 1
-    max_contacts = get_max_contacts(get_sequence(input_file))
+    max_contacts = get_max_contacts(get_sequence(input_file), dim)
     total_duration = 0.0
     print(f"Start doubling until {max_contacts = }")
     while goal_contacts <= max_contacts:
@@ -113,7 +113,7 @@ def solve_binary_binary(input_file: str, dim: int, version: int) -> dict[str, fl
     """
     # Double goal_contacts until it is unsolvable
     goal_contacts = 1
-    max_contacts = get_max_contacts(get_sequence(input_file))
+    max_contacts = get_max_contacts(get_sequence(input_file), dim)
     total_duration = 0.0
     print(f"Start doubling until {max_contacts = }")
     while goal_contacts <= max_contacts:
@@ -234,10 +234,26 @@ def get_grid_diameter(dim: int, n: int) -> int:
     return 2 + n // 4
 
 
-def get_max_contacts(s: str) -> int:
+def get_max_contacts(s: str, dim: int) -> int:
     """Find the maximum number of contacts that the sequence can have"""
     n = len(s)
-    return sum([s[i+3:n:2].count("1") for i in range(n-3) if s[i] == "1"])
+    max_adj = 2 if dim == 2 else 4
+    # The maximum number of potential contacts that the ith "1" can have
+    potential_contacts = [max_adj if i == "1" else 0 for i in s ] 
+    total = 0
+    for i in range(n - 3):
+        # Each "1" can only contact at max 4 (in 2d) or 6 (in 3d) other "1"s 
+        # that are at least 3 indexes away, and an odd distance away
+        if s[i] == "1" and potential_contacts[i] > 0:
+            # Max indexes that this index can contact with on the right
+            for j in range(i+3, n, 2):
+                if potential_contacts[i] == 0:
+                    break
+                if s[j] == "1":
+                    potential_contacts[i] -= 1
+                    potential_contacts[j] -= 1
+                    total += 1
+    return total
 
 
 def parse_args() -> argparse.Namespace:
