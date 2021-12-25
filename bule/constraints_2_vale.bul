@@ -17,7 +17,7 @@ adjPc[I,J] 	:: #ground rot[I,J,I,J], rot[I,J,J,I].
 % I and J in same position 
 adjPc[I,J], dim[D] :: #exists[0] same(I,J,D). 
 % I is within [+1,0,+1] of J 
-adjPc[I,J], dim[D] :: #exists[0] near(I,J,D). 
+pc[I,J], dim[D]    :: #exists[0] near(I,J,D). 
 
 %def of same
 rot[I,J,A,B], dim[D], pos[P]           :: ~same(I,J,D) | ~y(A,P,D) | y(B,P,D).
