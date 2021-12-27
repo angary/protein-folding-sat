@@ -16,8 +16,8 @@ OUTPUT = "validate.log"
 
 # List containing tuple of [dimension, version] of the encodings to compare
 ENCODINGS: list[tuple[int, int]] = [
-    (3, 1),
-    (3, 2),
+    (2, 2),
+    (2, 3),
 ]
 
 # List containing functions of the different search methods to compare
@@ -28,7 +28,7 @@ FUNCTIONS: list[Callable] = [
 ]
 
 # Flag to choose if we compare encodings or methods of search
-COMPARE_ENCODINGS = False
+COMPARE_ENCODINGS = True
 
 def main():
     vs = []
@@ -50,7 +50,7 @@ def main():
                 output = encode(filename, 1, dim, version)
                 print(output)
                 v, c = get_num_vars_and_clauses(sequence["filename"], version)
-                r = solve_binary_binary(filename, dim, version)
+                r = solve_binary_linear(filename, dim, version)
                 results.append([version, v, c, r["duration"], r["max_contacts"]])
             print(results)
             a, b = results[0:2]

@@ -1,34 +1,37 @@
-"""Visualise embedding of the protein string on the grid"""
+"""
+Visualise embedding of the protein string on the grid given a solved model from
+a file.
+"""
 
+import sys
 
 def main():
-    sequence = input("Enter sequence:\n")
-    sequence = [x for x in sequence.split() if x.startswith("x")]
-    grid = get_grid_from_new(sequence)
-    size = len(grid)
-    print("Grid: ")
-    print("=" * (size + 2))
-    for i in reversed(range(size)):
-        print(f"|{''.join(grid[i])}|")
-    print("=" * (size + 2))
+    if len(sys.argv) != 2:
+        print("Incorrect usage, needs one argument for the input file path")
+        return
+    with open(sys.argv[1]) as f:
+        line = f.readline()
+        sequence = [x for x in line.split() if x.startswith("x")]
+        grid = get_grid_from_new(sequence)
+        size = len(grid)
+        print("Grid: ")
+        print("=" * (size + 2))
+        for row in reversed(grid):
+            print(f"|{''.join(row)}|")
+        print("=" * (size + 2))
 
 
 def get_grid_from_new(sequence: list[str]) -> list[list[str]]:
     """
     Return the grid embedding from the new encoding
     """
-    size = max([int(x[4]) for x in sequence]) + 1
-    sequence_len = max([int(x[2]) for x in sequence]) + 1
+    size = max([int(max(x[4], x[6])) for x in sequence]) + 1
 
     grid = [[" " for _ in range(size)] for _ in range(size)]
 
-    for i in range(sequence_len):
-        i *= 2
-        x, y = int(sequence[i][4]), int(sequence[i + 1][4])
-        dimension = int(sequence[i][6]), int(sequence[i + 1][6])
-        if dimension[0] > dimension[1]:
-            x, y = y, x
-        grid[y][x] = str(i // 2)
+    for i, pos in enumerate(sequence):
+        x, y = int(pos[4]), int(pos[6])
+        grid[y][x] = str(i)
     return grid
 
 
