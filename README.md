@@ -19,13 +19,39 @@ The objective of this project is to examine the HP Model of protein folding unde
 
 ## Setup
 
-| **File**                         | **Purpose**                                                                                            |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| [bule](bule)                     | Bule2 encodings of the prototein problem, and linear constraints                                       |
-| [input](input)                   | Folder with files that contain protein sequences in the HP model                                       |
-| [models](models)                 | Folder containing the Bule2 and DIMACS CNF format encoding of the inputs                               |
-| [src](src)                       | Folder containing Python scripts for generating encodings and running tests                            |
-| [analysis.ipynb](analysis.ipynb) | Check that the new and old encoding produces the same number of contacts and compare their performance |
+<table>
+  <tbody>
+    <tr>
+      <th>Files / Folder</th>
+      <th>Purpose</th>
+    </tr>
+    <tr>
+      <td><b>bule</b></td>
+      <td>
+         Folder with files that contain protein sequences in the HP model
+         <ul>
+            <li>The number after the <code>v</code> denotes the version of the encoding</li>
+            <li> <code>v0</code> is the original encoding and has one for 2D and 3D embeddings</li>
+            <li> <code>v1</code> is the <code>v0</code> encoding with the dimensionality reduction improvement</li>
+            <li> <code>v2</code> is the <code>v1</code> encoding with the at least improvement</li>
+         </ul>
+      </td>
+    </tr>
+    <tr>
+      <td><b>models</b></td>
+      <td>Folder containing the Bule2 and DIMACS CNF format encoding of the inputs</td>
+    </tr>
+    <tr>
+      <td><b>src</b></td>
+      <td>
+         Folder containing Python scripts for generating encodings and running tests
+         <ul>
+            <li>The <b>util</b> folder contains helper scripts used for comparing encodings, or visualising embeddings</li>
+         </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 Note that some of these folders are not tracked by git due to large sizes.
 
