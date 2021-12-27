@@ -199,8 +199,8 @@ def encode(seq_file: str, goal_contacts: int, dim: int, version: int, tracked: b
 def get_encoding_file(dim: int, version: int) -> str:
     """Return path to the encoding with the specified dimensiona and version"""
     if version > 0:
-        return f"bule/constraints_{version}.bul"
-    return f"bule/constraints_{dim}d_0.bul"
+        return f"bule/constraints_v{version}.bul"
+    return f"bule/constraints_v{dim}d_0.bul"
 
 
 def get_num_vars_and_clauses(filename: str, version: int) -> tuple[int, int]:

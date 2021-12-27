@@ -1,4 +1,4 @@
-% adders
+% Adder Encoding
 %%% Input: `fullAdder[I1,I2,I3,O1,O2]`
 %%% Output: clauses constraining `var(I1)+var(I2)+var(I3)=2*var(O2)+var(O1)`
 %%% Input: `halfAdder[X1,X2,Y1,Y2]`

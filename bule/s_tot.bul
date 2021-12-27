@@ -1,4 +1,4 @@
-% order
+% Sort Totaliser
 %%% Input: `set[V,X]` a set `V` containing elements `X`.
 %%% Output: `order[V,X,I]` `X` is the `I`th element in set `V` (the first element is numbered `0`th).
 %%% Output: `order_last[V,N]` there are `N+1` elements in set `V`.
