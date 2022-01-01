@@ -1,4 +1,5 @@
-% At least
+% Order Encoding
+
 #ground enforce_same[0].
 
 % Generate the grid from the width
@@ -24,8 +25,6 @@ sequence[I, B], dim[D], pos[P], pos[P - 1] :: y(I, P, D) -> y(I, P - 1, D).
 sequence[I, B], sequence[J, C], I < J :: #ground different[I, J]. 
 different[I, J], dim[D] :: #exists[0] same(I, J, D).
 different[I, J], dim[D] :: #hide same(I, J, D), ~same(I, J, D).
-% different[I, J], dim[D], pos[P],  pos[P + 1] :: ~y(I, P + 1, D) & y(I, P, D) &  ~y(J, P + 1, D) & y(J, P, D) ->  same(I, J, D).
-% different[I, J], dim[D], pos[P], ~pos[P + 1] ::  y(I, P, D) &  y(J, P, D) ->  same(I, J, D).
 different[I, J], dim[D], pos[P] ::  pos[P + 1] : ~y(I, P + 1, D) & y(I, P, D) & pos[P + 1] : ~y(J, P + 1, D) & y(J, P, D) ->  same(I, J, D).
 different[I, J], dim[D], pos[P] :: ~y(I, P, D) &  y(J, P, D) -> ~same(I, J, D).
 different[I, J], dim[D], pos[P] ::  y(I, P, D) & ~y(J, P, D) -> ~same(I, J, D).

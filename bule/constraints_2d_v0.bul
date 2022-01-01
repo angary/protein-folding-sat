@@ -1,3 +1,5 @@
+% Original Encoding (2D)
+
 % Generate the grid from the width
 width[W] :: #ground coordinate[0 .. W - 1].
 coordinate[I], coordinate[J] :: #ground grid[c(I, J)].

@@ -7,9 +7,10 @@ import re
 import subprocess
 from datetime import datetime
 
+from src.config import TEST_VERSIONS as VERSIONS
+
 MAX_LEN = 30
 INPUT_DIR = "./input"
-VERSIONS: list[int] = [0, 2]
 IGNORE: list[str] = []
 
 
@@ -75,7 +76,7 @@ def run_test(filename: str, string: str, version: int, dimension: int) -> None:
             solve = "" if dim == 3 and seq_len >= 13 and v == 0 else "-s"
 
             command = f"python3 -m src.encode {input_file} {solve} -t -v {v} -d {dim}"
-            subprocess.run(command.split(), capture_output=True)
+            subprocess.run(command.split(), capture_output=False)
 
 
 def parse_args() -> argparse.Namespace:

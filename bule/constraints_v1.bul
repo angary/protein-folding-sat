@@ -1,3 +1,6 @@
+% Dimension Encoding
+
+
 % Parameter for enforcing if diferent in one dimension, same in others, comment to disable
 % TOOD: move parameters into seperate config file
 #ground enforce_same[0].

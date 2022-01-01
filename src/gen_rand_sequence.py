@@ -19,7 +19,7 @@ def main():
 
 
 def gen_sequences(length: int):
-    file_name_base = f"{os.path.join(FILE_PATH, 'length')}_{str(length)}"
+    file_name_base = f"{os.path.join(FILE_PATH, 'length')}-{length}"
     strings: list[str] = []
 
     while len(strings) < N:
@@ -30,7 +30,7 @@ def gen_sequences(length: int):
         # If this has not been added
         if next_str not in strings:
             strings.append(next_str)
-            file_name = f"{file_name_base}_{len(strings)}"
+            file_name = f"{file_name_base}-{len(strings)}"
 
             with open(file_name, "w+") as f:
                 print(strings[len(strings) - 1])

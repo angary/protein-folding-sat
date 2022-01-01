@@ -4,7 +4,7 @@ import argparse
 import subprocess
 import time
 
-TEST_REPEATS = 1
+from src.config import TEST_REPEATS
 
 
 def main() -> None:
@@ -37,7 +37,7 @@ def timed_solve(input_file: str, dim: int, version: int) -> None:
     with open(results_file, "w+") as f:
         f.write("length,time,contacts,variables,clauses\n")
     for _ in range(TEST_REPEATS):
-        r = solve_binary(input_file, dim, version)
+        r = solve_binary_linear(input_file, dim, version)
         vars, clauses = get_num_vars_and_clauses(filename, version)
         print(results_file)
         with open(results_file, "a") as f:
@@ -160,7 +160,7 @@ def solve_sat(input_file: str, goal_contacts: int, dim: int, version: int) -> fl
     elif "SAT" in output:
         print("SAT")
         return duration
-    print("There was a bug in solving with bule")
+    print(f"There was a bug in solving with bule. Output: {output}")
     return 0
 
 
@@ -200,7 +200,7 @@ def get_encoding_file(dim: int, version: int) -> str:
     """Return path to the encoding with the specified dimensiona and version"""
     if version > 0:
         return f"bule/constraints_v{version}.bul"
-    return f"bule/constraints_v{dim}d_0.bul"
+    return f"bule/constraints_{dim}d_v0.bul"
 
 
 def get_num_vars_and_clauses(filename: str, version: int) -> tuple[int, int]:
