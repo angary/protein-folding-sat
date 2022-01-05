@@ -3,9 +3,11 @@
 import argparse
 import subprocess
 import time
+from typing import Callable
 
 from src.config import TEST_REPEATS
 
+RESULTS_DIR = "results/encoding/"
 
 def main() -> None:
     """Extract arguments and determine whether to perform an encoding or solve"""
@@ -27,21 +29,6 @@ def main() -> None:
         print(f"Encoding bul    : {file_path.replace('.cnf', '.bul')}")
         print(f"Encoding kissat : {file_path}")
 
-
-def timed_solve(input_file: str, dim: int, version: int) -> None:
-    """Time how long it takes to solve a contact and write it into a file"""
-    length = len(get_sequence(input_file))
-    filename = input_file.split("/")[-1]
-    results_file = f"results/{filename}_{dim}d_v{version}.csv"
-
-    with open(results_file, "w+") as f:
-        f.write("length,time,contacts,variables,clauses\n")
-    for _ in range(TEST_REPEATS):
-        r = solve_binary_linear(input_file, dim, version)
-        vars, clauses = get_num_vars_and_clauses(filename, version)
-        print(results_file)
-        with open(results_file, "a") as f:
-            f.write(f"{length},{r['duration']},{r['max_contacts']},{vars},{clauses}\n")
 
 def solve_binary(input_file: str, dim: int, version: int) -> dict[str, float]:
     """
@@ -144,6 +131,22 @@ def solve_binary_binary(input_file: str, dim: int, version: int) -> dict[str, fl
     return { "max_contacts": goal_contacts, "duration": total_duration }
 
 
+def timed_solve(input_file: str, dim: int, version: int, search: Callable = solve_binary_linear) -> None:
+    """Time how long it takes to solve a contact and write it into a file"""
+    length = len(get_sequence(input_file))
+    filename = input_file.split("/")[-1]
+    results_file = f"{RESULTS_DIR}{filename}_{dim}d_v{version}.csv"
+
+    with open(results_file, "w+") as f:
+        f.write("length,time,contacts,variables,clauses\n")
+    for _ in range(TEST_REPEATS):
+        r = search(input_file, dim, version)
+        vars, clauses = get_num_vars_and_clauses(filename, version)
+        print(results_file)
+        with open(results_file, "a") as f:
+            f.write(f"{length},{r['duration']},{r['max_contacts']},{vars},{clauses}\n")
+
+
 def solve_sat(input_file: str, goal_contacts: int, dim: int, version: int) -> float:
     """
     Run an encoding of the input file, with the target goal of contacts and
@@ -189,7 +192,7 @@ def encode(seq_file: str, goal_contacts: int, dim: int, version: int, tracked: b
     subprocess.run(f"bule2 --output dimacs {bule_files} {in_file} > {output}", shell=True)
 
     if tracked:
-        with open(f"results/{file_name}_{dim}d_{version}.csv", "w+") as f:
+        with open(f"{RESULTS_DIR}{file_name}_{dim}d_{version}.csv", "w+") as f:
             vars, clauses = get_num_vars_and_clauses(file_name, version)
             f.write("length,time,contacts,variables,clauses\n")
             f.write(f"{len(sequence)},0,0,{vars},{clauses}")
