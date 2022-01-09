@@ -1,6 +1,18 @@
 """
 Visualise embedding of the protein string on the grid given a solved model from
 a file.
+
+Example:
+
+Input file:
+---
+x(0,0,0)  x(1,0,1)  x(2,0,2)  x(3,0,3)  x(4,1,3)  x(5,1,2)
+---
+
+
+Output (to terminal):
+
+
 """
 
 import sys

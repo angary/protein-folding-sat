@@ -30,6 +30,7 @@ FUNCTIONS: list[Callable] = [
 # Flag to choose if we compare encodings or methods of search
 COMPARE_ENCODINGS = True
 
+# TODO: Fix script to work with new file naming scheme (i.e. contains dim, version, goal contacts)
 def main():
     vs = []
     cs = []
@@ -45,11 +46,12 @@ def main():
         results = []
 
         # Compare different encodings
+        goal_contacts = 1
         if COMPARE_ENCODINGS:
             for dim, version in ENCODINGS:
-                output = encode(filename, 1, dim, version)
+                output = encode(filename, goal_contacts, dim, version)
                 print(output)
-                v, c = get_num_vars_and_clauses(sequence["filename"], version)
+                v, c = get_num_vars_and_clauses(sequence["filename"], dim, version, goal_contacts)
                 r = solve_binary_linear(filename, dim, version)
                 results.append([version, v, c, r["duration"], r["max_contacts"]])
             print(results)
