@@ -10,7 +10,7 @@ from src.encode import encode, get_num_vars_and_clauses, solve_binary, \
 from src.run_tests import get_sequences
 
 MIN_LEN = 0
-MAX_LEN = 22
+MAX_LEN = 20
 INPUT_DIR = "input"
 OUTPUT = "validate.log"
 
@@ -30,6 +30,7 @@ FUNCTIONS: list[Callable] = [
 # Flag to choose if we compare encodings or methods of search
 COMPARE_ENCODINGS = True
 
+# TODO: Fix script to work with new file naming scheme (i.e. contains dim, version, goal contacts)
 def main():
     vs = []
     cs = []
@@ -45,12 +46,13 @@ def main():
         results = []
 
         # Compare different encodings
+        goal_contacts = 1
         if COMPARE_ENCODINGS:
             for dim, version in ENCODINGS:
-                output = encode(filename, 1, dim, version)
+                output = encode(filename, goal_contacts, dim, version, use_cached=True)
                 print(output)
-                v, c = get_num_vars_and_clauses(sequence["filename"], version)
-                r = solve_binary_linear(filename, dim, version)
+                v, c = get_num_vars_and_clauses(sequence["filename"], dim, version, goal_contacts)
+                r = solve_binary_linear(filename, dim, version, use_cached=True)
                 results.append([version, v, c, r["duration"], r["max_contacts"]])
             print(results)
             a, b = results[0:2]
@@ -74,7 +76,7 @@ def main():
             DIMENSION = 2
             VERSION = 2
             for func in FUNCTIONS:
-                r = func(filename, DIMENSION, VERSION)
+                r = func(filename, DIMENSION, VERSION, use_cached=True)
                 results.append([func.__name__, r["duration"], r["max_contacts"]])
                 times[func.__name__] += r["duration"]
             a, b = results[0:2]
