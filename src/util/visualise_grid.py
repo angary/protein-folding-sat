@@ -25,6 +25,7 @@ Grid:
 =====
 """
 
+import re
 import sys
 
 from src.util.convert import convert
@@ -37,32 +38,38 @@ def main():
     grid = get_grid_from_new(sequence)
     size = len(grid)
     print("Grid: ")
-    print("=" * (size + 2))
+    print("=" * (size * (len(str(len(sequence))) + 1) + 2))
     for row in reversed(grid):
         print(f"|{''.join(row)}|")
-    print("=" * (size + 2))
+    print("=" * (size * (len(str(len(sequence))) + 1) + 2))
 
 
 def get_sequence_embedding(filepath: str) -> str:
     with open(filepath) as f:
         line = f.readlines()[-1]
-        if "y(" in line:
+        if re.match(r"x\(\d,\d,\d\)", line):
+            print("HI")
             line = convert(filepath)
-        sequence = [x for x in line.split() if x.startswith("x")]
-        return sequence
+            print(line)
+        else:
+            line = [x for x in line.split() if x.startswith("x")]
+            line = [x.replace("c(","").replace("))",")") for x in line]
+        return line
 
 
 def get_grid_from_new(sequence: list[str]) -> list[list[str]]:
     """
     Return the grid embedding from the new encoding
     """
-    size = max([int(max(x[4], x[6])) for x in sequence]) + 1
+    size = max([int(max(x.split(",")[1], x.split(",")[2].rstrip(")"))) for x in sequence]) + 1
 
-    grid = [[" " for _ in range(size)] for _ in range(size)]
-
+    max_digits = len(str(len(sequence))) + 1
+    padding = " " * max_digits
+    grid = [[padding for _ in range(size)] for _ in range(size)]
     for i, pos in enumerate(sequence):
-        x, y = int(pos[4]), int(pos[6])
-        grid[y][x] = str(i)
+        pos = pos.split(",")
+        x, y = int(pos[1]), int(pos[2].rstrip(")"))
+        grid[y][x] = str(i).rjust(max_digits, " ")
     return grid
 
 
