@@ -10,7 +10,7 @@ from src.encode import encode, get_num_vars_and_clauses, solve_binary, \
 from src.run_tests import get_sequences
 
 MIN_LEN = 0
-MAX_LEN = 22
+MAX_LEN = 20
 INPUT_DIR = "input"
 OUTPUT = "validate.log"
 
@@ -49,10 +49,10 @@ def main():
         goal_contacts = 1
         if COMPARE_ENCODINGS:
             for dim, version in ENCODINGS:
-                output = encode(filename, goal_contacts, dim, version)
+                output = encode(filename, goal_contacts, dim, version, use_cached=True)
                 print(output)
                 v, c = get_num_vars_and_clauses(sequence["filename"], dim, version, goal_contacts)
-                r = solve_binary_linear(filename, dim, version)
+                r = solve_binary_linear(filename, dim, version, use_cached=True)
                 results.append([version, v, c, r["duration"], r["max_contacts"]])
             print(results)
             a, b = results[0:2]
@@ -76,7 +76,7 @@ def main():
             DIMENSION = 2
             VERSION = 2
             for func in FUNCTIONS:
-                r = func(filename, DIMENSION, VERSION)
+                r = func(filename, DIMENSION, VERSION, use_cached=True)
                 results.append([func.__name__, r["duration"], r["max_contacts"]])
                 times[func.__name__] += r["duration"]
             a, b = results[0:2]

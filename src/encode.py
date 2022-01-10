@@ -148,7 +148,6 @@ def solve_sat(input_file: str, goal_contacts: int, dim: int, version: int, use_c
     Run an encoding of the input file, with the target goal of contacts and
     return the duration for solving if it managed
     """
-    print(f"{use_cached = }")
     file_path = encode(input_file, goal_contacts, dim, version, use_cached=use_cached)
     command = f"kissat {file_path} -q"
     start = time.time()
@@ -193,7 +192,6 @@ def encode(
         ])
     bule_files = f"{get_encoding_file(dim, version)} bule/cc_a.bul"
     output = f"models/cnf/{file_name}_{dim}d_v{version}_{goal_contacts}c.cnf"
-    print(f"{use_cached = }")
     if not use_cached or not os.path.isfile(output):
         subprocess.run(f"bule2 --output dimacs {bule_files} {in_file} > {output}", shell=True)
 
