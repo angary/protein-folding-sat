@@ -47,6 +47,9 @@ The objective of this project is to examine the HP Model of protein folding unde
          Folder containing Python scripts for generating encodings and running tests
          <ul>
             <li>The <b>util</b> folder contains helper scripts used for comparing encodings, or visualising embeddings</li>
+            <ul>
+              <li>To visualise a grid, run <code>bule2 &lt;model> &lt;constraints> 2> temp.bul; python3 -m src.util.visualise_grid temp.bul</code>
+            </ul>
          </ul>
       </td>
     </tr>
