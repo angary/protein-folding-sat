@@ -43,9 +43,10 @@ def convert(filepath: str) -> str:
         index = 0
         index_position = [0, 0]
         for pos in positions:
-            curr_index = int(pos[2])
-            pos_in_dim = int(pos[4])
-            dimension = int(pos[6])
+            pos = pos.split(",")
+            curr_index = int(pos[0].lstrip("y("))
+            pos_in_dim = int(pos[1])
+            dimension = int(pos[2].rstrip(")"))
             if curr_index > index:
                 xs.append(index_position.copy())
                 index += 1

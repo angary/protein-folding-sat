@@ -6,23 +6,22 @@ Example:
 
 Input file:
 ---
-x(0,0,0)  x(1,0,1)  x(2,0,2)  x(3,1,2)  x(4,1,1)  x(5,1,0)  x(6,2,0)  x(7,2,1)
----
-
-or
-
----
-Model 1:  y(0,0,0)  y(0,0,1) ~y(0,1,0) ~y(0,1,1) ~y(0,2,0) ~y(0,2,1) ~y(0,3,0) ~y(0,3,1) ~y(0,4,0) ~y(0,4,1) ~y(0,5,0) ~y(0,5,1) ~y(0,6,0) ~y(0,6,1) ~y(0,7,0) ~y(0,7,1)  y(1,0,0)  y(1,0,1) ~y(1,1,0)  y(1,1,1) ~y(1,2,0) ~y(1,2,1) ~y(1,3,0) ~y(1,3,1) ~y(1,4,0) ~y(1,4,1) ~y(1,5,0) ~y(1,5,1) ~y(1,6,0) ~y(1,6,1) ~y(1,7,0) ~y(1,7,1)  y(2,0,0)  y(2,0,1) ~y(2,1,0)  y(2,1,1) ~y(2,2,0)  y(2,2,1) ~y(2,3,0) ~y(2,3,1) ~y(2,4,0) ~y(2,4,1) ~y(2,5,0) ~y(2,5,1) ~y(2,6,0) ~y(2,6,1) ~y(2,7,0) ~y(2,7,1)  y(3,0,0)  y(3,0,1)  y(3,1,0)  y(3,1,1) ~y(3,2,0)  y(3,2,1) ~y(3,3,0) ~y(3,3,1) ~y(3,4,0) ~y(3,4,1) ~y(3,5,0) ~y(3,5,1) ~y(3,6,0) ~y(3,6,1) ~y(3,7,0) ~y(3,7,1)  y(4,0,0)  y(4,0,1)  y(4,1,0)  y(4,1,1) ~y(4,2,0) ~y(4,2,1) ~y(4,3,0) ~y(4,3,1) ~y(4,4,0) ~y(4,4,1) ~y(4,5,0) ~y(4,5,1) ~y(4,6,0) ~y(4,6,1) ~y(4,7,0) ~y(4,7,1)  y(5,0,0)  y(5,0,1)  y(5,1,0) ~y(5,1,1) ~y(5,2,0) ~y(5,2,1) ~y(5,3,0) ~y(5,3,1) ~y(5,4,0) ~y(5,4,1) ~y(5,5,0) ~y(5,5,1) ~y(5,6,0) ~y(5,6,1) ~y(5,7,0) ~y(5,7,1)  y(6,0,0)  y(6,0,1)  y(6,1,0) ~y(6,1,1)  y(6,2,0) ~y(6,2,1) ~y(6,3,0) ~y(6,3,1) ~y(6,4,0) ~y(6,4,1) ~y(6,5,0) ~y(6,5,1) ~y(6,6,0) ~y(6,6,1) ~y(6,7,0) ~y(6,7,1)  y(7,0,0)  y(7,0,1)  y(7,1,0)  y(7,1,1)  y(7,2,0) ~y(7,2,1) ~y(7,3,0) ~y(7,3,1) ~y(7,4,0) ~y(7,4,1) ~y(7,5,0) ~y(7,5,1) ~y(7,6,0) ~y(7,6,1) ~y(7,7,0) ~y(7,7,1)  same(0,1,0) ~same(0,1,1)  same(0,2,0) ~same(0,2,1) ~same(0,3,0) ~same(0,3,1) ~same(0,4,0) ~same(0,4,1) ~same(0,5,0)  same(0,5,1) ~same(0,6,0)  same(0,6,1) ~same(0,7,0) ~same(0,7,1)  same(1,2,0) ~same(1,2,1) ~same(1,3,0) ~same(1,3,1) ~same(1,4,0)  same(1,4,1) ~same(1,5,0) ~same(1,5,1) ~same(1,6,0) ~same(1,6,1) ~same(1,7,0)  same(1,7,1) ~same(2,3,0)  same(2,3,1) ~same(2,4,0) ~same(2,4,1) ~same(2,5,0) ~same(2,5,1) ~same(2,6,0) ~same(2,6,1) ~same(2,7,0) ~same(2,7,1)  same(3,4,0) ~same(3,4,1)  same(3,5,0) ~same(3,5,1) ~same(3,6,0) ~same(3,6,1) ~same(3,7,0) ~same(3,7,1)  same(4,5,0) ~same(4,5,1) ~same(4,6,0) ~same(4,6,1) ~same(4,7,0)  same(4,7,1) ~same(5,6,0)  same(5,6,1) ~same(5,7,0) ~same(5,7,1)  same(6,7,0) ~same(6,7,1) ~next(0,1,0)  next(0,1,1) ~next(1,2,0)  next(1,2,1)  next(1,4,0) ~next(1,4,1) ~next(1,6,0)  next(1,6,1)  next(2,3,0) ~next(2,3,1) ~next(3,4,0)  next(3,4,1) ~next(4,5,0)  next(4,5,1)  next(4,7,0) ~next(4,7,1)  next(5,6,0) ~next(5,6,1) ~next(6,7,0)  next(6,7,1)  var(contact(1,4)) ~var(contact(1,6))  var(contact(4,7))
+Model 1:  x(0,c(4,1))  x(1,c(5,1))  x(10,c(0,3))  x(11,c(0,4))  x(12,c(1,4))  x(13,c(1,5))  x(14,c(2,5))  x(15,c(2,4))  x(16,c(2,3))  x(17,c(3,3))  x(18,c(4,3))  x(19,c(4,4))  x(2,c(5,2))  x(20,c(3,4))  x(3,c(4,2))  x(4,c(3,2))  x(5,c(2,2))  x(6,c(2,1))  x(7,c(1,1))  x(8,c(1,2))  x(9,c(1,3))
 ---
 
 Output (to terminal):
 
+----
 Grid: 
-=====
-|23 |
-|147|
-|056|
-=====
+====================
+|    13 14         |
+| 11 12 15 20 19   |
+| 10  9 16 17 18   |
+|     8  5  4  3  2|
+|     7  6     0  1|
+|                  |
+====================
+---
 """
 
 import re
@@ -47,11 +46,12 @@ def main():
 def get_sequence_embedding(filepath: str) -> str:
     with open(filepath) as f:
         line = f.readlines()[-1]
+
         if re.match(r"x\(\d,\d,\d\)", line):
-            print("HI")
+            # v1 encoding
             line = convert(filepath)
-            print(line)
         else:
+            # v0 encdoing
             line = [x for x in line.split() if x.startswith("x")]
             line = [x.replace("c(","").replace("))",")") for x in line]
         return line
@@ -66,6 +66,9 @@ def get_grid_from_new(sequence: list[str]) -> list[list[str]]:
     max_digits = len(str(len(sequence))) + 1
     padding = " " * max_digits
     grid = [[padding for _ in range(size)] for _ in range(size)]
+
+    # Sort the sequence by index
+    sequence.sort(key=lambda x:int(x.split(",")[0].lstrip("x(")))
     for i, pos in enumerate(sequence):
         pos = pos.split(",")
         x, y = int(pos[1]), int(pos[2].rstrip(")"))
