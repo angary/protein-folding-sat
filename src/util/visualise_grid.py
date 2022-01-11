@@ -30,7 +30,7 @@ import sys
 from src.util.convert import convert
 
 def main():
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print("Incorrect usage, needs one argument for the input file path")
         return
     sequence = get_sequence_embedding(sys.argv[1])
@@ -42,6 +42,19 @@ def main():
         print(f"|{''.join(row)}|")
     print("=" * (size * (len(str(len(sequence))) + 1) + 2))
 
+    if len(sys.argv) == 3:
+        print("=" * (len(grid[0] * 2) + 1))
+        binary_sequence = sys.argv[2]
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                char = grid[i][j].strip()
+                if char.isdigit():
+                    grid[i][j] = binary_sequence[int(char)]
+                else:
+                    grid[i][j] = " "
+        for row in reversed(grid):
+            print(f"|{' '.join(row)}|")
+        print("=" * (len(grid[0] * 2) + 1))
 
 def get_sequence_embedding(filepath: str) -> str:
     with open(filepath) as f:
