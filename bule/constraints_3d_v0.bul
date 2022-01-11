@@ -15,20 +15,20 @@ coord[I], coord[J], next_coord[K,L] :: #ground adj[c(K,I,J),c(L,I,J)]. % Bottom 
 
 % If x(i,j) is true,then the character at position i in the sequence is 
 % assigned to point j in the grid
-sequence[I,B], grid[G] :: #exists[0] x(I,G).
-sequence[I,B], grid[G] :: #hide x(I,G),~x(I,G).
+sequence[I,_], grid[G] :: #exists[0] x(I,G).
+sequence[I,_], grid[G] :: #hide x(I,G),~x(I,G).
 
 % Every character in the sequence is assigned to some point in G
-sequence[I,B] :: grid[G] : x(I,G).
+sequence[I,_] :: grid[G] : x(I,G).
 
 % No character-position in the sequence can be assigned to more than one point
-sequence[I,B], grid[G1], grid[G2], G1 < G2:: ~x(I,G1) | ~x(I,G2).
+sequence[I,_], grid[G1], grid[G2], G1 < G2:: ~x(I,G1) | ~x(I,G2).
 
 % No point in the grid can have more than one character-position assigned to it
-grid[G], sequence[I1,B1], sequence[I2,B2], I1 < I2:: ~x(I1,G) | ~x(I2,G).
+grid[G], sequence[I1,_], sequence[I2,_], I1 < I2:: ~x(I1,G) | ~x(I2,G).
 
 % Every adjacent pair of character positions must be placed on adjacent points in the grid
-sequence[I,B1], sequence[I+1,B2], grid[G1] :: ~x(I,G1) | adj[G1,G2] : x(I+1,G2) | adj[G3,G1] : x(I+1,G3).
+sequence[I,_], sequence[I+1,_], grid[G1] :: ~x(I,G1) | adj[G1,G2] : x(I+1,G2) | adj[G3,G1] : x(I+1,G3).
 
 % Identifying Potential Contacts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
