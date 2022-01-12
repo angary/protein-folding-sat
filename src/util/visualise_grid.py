@@ -57,9 +57,7 @@ def get_grid_from_new(sequence: list[str]) -> list[list[str]]:
     Return the grid embedding from the new encoding
     """
     size = max([int(max(x[4], x[6])) for x in sequence]) + 1
-
     grid = [[" " for _ in range(size)] for _ in range(size)]
-
     for i, pos in enumerate(sequence):
         x, y = int(pos[4]), int(pos[6])
         grid[y][x] = str(i)
