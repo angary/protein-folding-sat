@@ -35,7 +35,7 @@ def main() -> None:
 
 def solve_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
     """Binary search for max contacts"""
-    total_encode_time, total_solve_time = 0.0, 0.0
+    total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
     lo, hi = 0, get_max_contacts(get_sequence(seq_file), dim)
     print(f"Start binary search to max contacts from {hi = }")
     while lo <= hi:
@@ -46,11 +46,17 @@ def solve_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[st
         total_solve_time += abs(solve_time)
         if solve_time > 0:
             lo = curr + 1
+            sat_solve_time += solve_time
         else:
             curr -= 1
             hi = curr
     print()
-    return { "max_contacts": curr, "encode_time": total_encode_time, "solve_time": total_solve_time }
+    return {
+        "max_contacts": curr,
+        "encode_time": total_encode_time,
+        "solve_time": total_solve_time,
+        "sat_solve_time": sat_solve_time
+    }
 
 
 def solve_binary_linear(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
@@ -58,7 +64,7 @@ def solve_binary_linear(seq_file: str, dim: int, ver: int, use_cached: bool) -> 
     # Double goal_contacts until it is unsolvable
     curr = 1
     max_contacts = get_max_contacts(get_sequence(seq_file), dim)
-    total_encode_time, total_solve_time = 0.0, 0.0
+    total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
     print(f"Start doubling until {max_contacts = }")
     while curr <= max_contacts:
         print(f"Solving {curr}: ", end="", flush=True)
@@ -67,6 +73,7 @@ def solve_binary_linear(seq_file: str, dim: int, ver: int, use_cached: bool) -> 
         total_solve_time += abs(solve_time)
         if solve_time <= 0:
             break
+        sat_solve_time += solve_time
         curr *= 2
     print(f"Failed to solve at {curr}\n")
 
@@ -82,9 +89,14 @@ def solve_binary_linear(seq_file: str, dim: int, ver: int, use_cached: bool) -> 
         if solve_time <= 0:
             curr -= 1
             break
+        sat_solve_time += solve_time
     print()
-    return { "max_contacts": curr, "encode_time": total_encode_time, "solve_time": total_solve_time }
-
+    return {
+        "max_contacts": curr,
+        "encode_time": total_encode_time,
+        "solve_time": total_solve_time,
+        "sat_solve_time": sat_solve_time
+    }
 
 def solve_binary_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
     """
@@ -93,7 +105,7 @@ def solve_binary_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> 
     # Double goal_contacts until it is unsolvable
     curr = 1
     max_contacts = get_max_contacts(get_sequence(seq_file), dim)
-    total_encode_time, total_solve_time = 0.0, 0.0
+    total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
     print(f"Start doubling until {max_contacts = }")
     while curr <= max_contacts:
         print(f"Solving {curr}: ", end="", flush=True)
@@ -102,6 +114,7 @@ def solve_binary_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> 
         total_solve_time += abs(solve_time)
         if solve_time <= 0:
             break
+        sat_solve_time += solve_time
         curr *= 2
     print(f"Failed to solve at {curr}\n")
 
@@ -116,11 +129,17 @@ def solve_binary_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> 
         total_solve_time += abs(solve_time)
         if solve_time > 0:
             lo = curr + 1
+            sat_solve_time += solve_time
         else:
             curr -= 1
             hi = curr
     print()
-    return { "max_contacts": curr, "encode_time": total_encode_time, "solve_time": total_solve_time }
+    return {
+        "max_contacts": curr,
+        "encode_time": total_encode_time,
+        "solve_time": total_solve_time,
+        "sat_solve_time": sat_solve_time
+    }
 
 def timed_solve(
     seq_file: str,

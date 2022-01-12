@@ -9,7 +9,7 @@ from src.encode import encode, get_num_vars_and_clauses, solve_binary, \
     solve_binary_binary, solve_binary_linear, get_max_contacts
 from src.run_tests import get_sequences
 
-MIN_LEN = 0
+MIN_LEN = 17
 MAX_LEN = 20
 INPUT_DIR = "input"
 OUTPUT = "validate.log"
@@ -48,12 +48,13 @@ def main():
                 v, c = get_num_vars_and_clauses(sequence["filename"], dim, version, goal_contacts)
                 r = solve_binary_linear(filename, dim, version, USE_CACHED)
                 results.append({
-                    "version": version,
+                    "ver": version,
                     "vars": v,
-                    "clauses": c,
+                    "cls": c,
                     "encode_time": round(r["encode_time"], 4),
                     "solve_time": round(r["solve_time"], 4),
-                    "max_contacts": r["max_contacts"]
+                    "sat_time": round(r["sat_solve_time"], 4),
+                    "contacts": r["max_contacts"]
                 })
             a, b = results[0:2]
             variable_diff = (b["vars"] - a["vars"]) / a["vars"]
@@ -66,9 +67,9 @@ def main():
 
             result_str = "\n".join(list(map(str, results)))
             with open(OUTPUT, "a") as f:
-                f.write(f"{filename} Max contacts: {get_max_contacts(sequence['string'], dim)}\n")
+                f.write(f"{filename = } | Max contacts = {get_max_contacts(sequence['string'], dim)}\n")
                 f.write(f"{result_str}\n")
-                f.write(f"Same contacts : {a['max_contacts'] == b['max_contacts']}\n")
+                f.write(f"Same contacts : {a['contacts'] == b['contacts']}\n")
                 f.write(f"Leq variables : {variable_diff <= 0} {variable_diff}\n")
                 f.write(f"Leq clauses   : {clause_diff <= 0} {clause_diff}\n")
                 f.write(f"Less time     : {time_diff <= 0} {time_diff}\n\n")
