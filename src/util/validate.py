@@ -47,22 +47,28 @@ def main():
                 print(output)
                 v, c = get_num_vars_and_clauses(sequence["filename"], dim, version, goal_contacts)
                 r = solve_binary_linear(filename, dim, version, USE_CACHED)
-                results.append([version, v, c, r["duration"], r["max_contacts"]])
-            print(results)
+                results.append({
+                    "version": version,
+                    "vars": v,
+                    "clauses": c,
+                    "encode_time": round(r["encode_time"], 4),
+                    "solve_time": round(r["solve_time"], 4),
+                    "max_contacts": r["max_contacts"]
+                })
             a, b = results[0:2]
-            variable_diff = (b[1] - a[1]) / a[1]
-            clause_diff = (b[2] - a[2]) / a[2]
-            time_diff = (b[3] - a[3]) / a[3] if min(b[3], a[3]) != 0 else 0
+            variable_diff = (b["vars"] - a["vars"]) / a["vars"]
+            clause_diff = (b["clauses"] - a["clauses"]) / a["clauses"]
+            time_diff = (b["solve_time"] - a["solve_time"]) / a["solve_time"] if min(b["solve_time"], a["solve_time"]) != 0 else 0
 
-            vs.append(b[1] - a[1])
-            cs.append(b[2] - a[2])
-            ts.append(b[3] - a[3])
+            vs.append(b["vars"] - a["vars"])
+            cs.append(b["clauses"] - a["clauses"])
+            ts.append(b["solve_time"] - a["solve_time"])
 
             result_str = "\n".join(list(map(str, results)))
             with open(OUTPUT, "a") as f:
-                f.write(f"{filename} {sequence['string']}\nVersion, Vars, Clauses, Duration, Contacts, {get_max_contacts(sequence['string'], dim)}\n")
+                f.write(f"{filename} Max contacts: {get_max_contacts(sequence['string'], dim)}\n")
                 f.write(f"{result_str}\n")
-                f.write(f"Same contacts : {a[4] == b[4]}\n")
+                f.write(f"Same contacts : {a['max_contacts'] == b['max_contacts']}\n")
                 f.write(f"Leq variables : {variable_diff <= 0} {variable_diff}\n")
                 f.write(f"Leq clauses   : {clause_diff <= 0} {clause_diff}\n")
                 f.write(f"Less time     : {time_diff <= 0} {time_diff}\n\n")
@@ -71,8 +77,8 @@ def main():
             VERSION = 2
             for func in FUNCTIONS:
                 r = func(filename, DIMENSION, VERSION, USE_CACHED)
-                results.append([func.__name__, r["duration"], r["max_contacts"]])
-                times[func.__name__] += r["duration"]
+                results.append([func.__name__, r["solve_time"], r["max_contacts"]])
+                times[func.__name__] += r["solve_time"]
             a, b = results[0:2]
             time_diff = (b[1] - a[1]) / a[1] if min(b[1], a[1]) != 0 else 0
             with open(OUTPUT, "a") as f:
