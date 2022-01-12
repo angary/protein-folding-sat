@@ -3,23 +3,23 @@
 #ground enforce_same[0].
 
 % Generate the grid from the width
-width[W] :: #ground pos[0 .. W - 1].
+width[W] :: #ground pos[0..W-1].
 
 % Ensuring Legal Embeddings
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % If y(I,P,D) is true,then the character at position i in the sequence is 
 % at least in position P in dimension D
-sequence[I,B], pos[P], dim[D] :: #exists[0] y(I,P,D).
+sequence[I,_], pos[P], dim[D] :: #exists[0] y(I,P,D).
 
 % Every character in the sequence is assigned to some point in a dimension (at least in position 0)
-sequence[I,B], dim[D] :: y(I,0,D).
+sequence[I,_], dim[D] :: y(I,0,D).
 
 % No character-position in the sequence can be assigned to more than one point
-sequence[I,B], dim[D], pos[P], pos[P+1], P>0 :: y(I,P+1,D) -> y(I,P,D).
+sequence[I,_], dim[D], pos[P], pos[P+1], P>0 :: y(I,P+1,D) -> y(I,P,D).
 
 % No point in the grid can have more than one character-position assigned to it AKA two indexes cannot be on the same point
-sequence[I,B], sequence[J,C], I < J :: #ground diff[I,J]. 
+sequence[I,_], sequence[J,_], I<J :: #ground diff[I,J]. 
 diff[I,J], dim[D] :: #exists[0] same(I,J,D).
 diff[I,J], dim[D], pos[P] ::  pos[P+1] : ~y(I,P+1,D) & y(I,P,D) & pos[P+1] : ~y(J,P+1,D) & y(J,P,D) ->  same(I,J,D).
 diff[I,J], dim[D], pos[P], P>0 :: ~y(I,P,D) &  y(J,P,D) -> ~same(I,J,D).
@@ -27,8 +27,8 @@ diff[I,J], dim[D], pos[P], P>0 ::  y(I,P,D) & ~y(J,P,D) -> ~same(I,J,D).
 diff[I,J] :: dim[D] : ~same(I,J,D).
 
 % Every adjacent pair of character positions must be placed on adjacent points in the grid
-sequence[I,1], sequence[J,1], J - I #mod 2 == 1,I+2 < J :: #ground pc[I,J].
-sequence[I,B], sequence[I+1,C] :: #ground adj[I,I+1].
+sequence[I,1], sequence[J,1], J-I #mod 2 == 1, I+2 < J :: #ground pc[I,J].
+sequence[I,_], sequence[I+1,_] :: #ground adj[I,I+1].
 pc[I,J] :: #ground adj_or_pc[I,J].
 adj[I,J] :: #ground adj_or_pc[I,J].
 adj_or_pc[I,J], dim[D] :: #exists[0] next(I,J,D).

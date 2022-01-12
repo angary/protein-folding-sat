@@ -15,32 +15,31 @@ def main() -> None:
     args = parse_args()
     input_file = args.input_file
     goal_contacts = args.goal_contacts
-    dimension = args.dimension
-    version = args.version
+    dim = args.dimension
+    v = args.version
     use_cached = args.use_cached
     if args.solve and args.track:
         print("Attempting to solve and time\n")
-        timed_solve(input_file, dimension, version, solve_binary_linear, use_cached)
+        timed_solve(input_file, dim, v, solve_binary_linear, use_cached)
     elif args.solve:
         print("Attempting to solve\n")
-        print(f"Max contacts: {solve_binary_linear(input_file, dimension, version, use_cached)}")
+        print(f"Max contacts: {solve_binary_linear(input_file, dim, v, use_cached)}")
     else:
         print("Attempting to encode\n")
-        file_path = encode(input_file, goal_contacts, dimension, version, use_cached)
+        file_path = encode(input_file, goal_contacts, dim, v, use_cached)
         print(f"Encoding bul    : {file_path.replace('.cnf', '.bul')}")
         print(f"Encoding kissat : {file_path}")
 
 
-def solve_binary(input_file: str, dim: int, version: int, use_cached: bool = False) -> dict[str, float]:
+def solve_binary(input_file: str, dim: int, v: int, use_cached: bool = False) -> dict[str, float]:
     """Binary search for max contacts"""
-    total_duration, lo, hi = 0.0, 0
+    total_duration = 0.0
     lo, hi = 0, get_max_contacts(get_sequence(input_file), dim)
-    goal_contacts = (hi + lo) // 2
     print(f"Start binary search to max contacts from {hi = }")
     while lo <= hi:
         goal_contacts = (hi + lo) // 2
         print(f"Solving {goal_contacts}:", end=" ")
-        duration = solve_sat(input_file, goal_contacts, dim, version, use_cached)
+        duration = solve_sat(input_file, goal_contacts, dim, v, use_cached)
         total_duration += abs(duration)
         if duration > 0:
             lo = goal_contacts + 1
@@ -51,7 +50,7 @@ def solve_binary(input_file: str, dim: int, version: int, use_cached: bool = Fal
     return { "max_contacts": goal_contacts, "duration": total_duration }
 
 
-def solve_binary_linear(input_file: str, dim: int, version: int, use_cached: bool = False) -> dict[str, float]:
+def solve_binary_linear(input_file: str, dim: int, v: int, use_cached: bool = False) -> dict[str, float]:
     """Double till UNSAT, then linear search for max contacts"""
     # Double goal_contacts until it is unsolvable
     goal_contacts = 1
@@ -60,7 +59,7 @@ def solve_binary_linear(input_file: str, dim: int, version: int, use_cached: boo
     print(f"Start doubling until {max_contacts = }")
     while goal_contacts <= max_contacts:
         print(f"Solving {goal_contacts}: ", end="", flush=True)
-        duration = solve_sat(input_file, goal_contacts, dim, version, use_cached)
+        duration = solve_sat(input_file, goal_contacts, dim, v, use_cached)
         total_duration += abs(duration)
         if duration <= 0:
             break
@@ -73,7 +72,7 @@ def solve_binary_linear(input_file: str, dim: int, version: int, use_cached: boo
     while goal_contacts < max_contacts:
         goal_contacts += 1
         print(f"Solving {goal_contacts}:", end=" ")
-        duration = solve_sat(input_file, goal_contacts, dim, version, use_cached)
+        duration = solve_sat(input_file, goal_contacts, dim, v, use_cached)
         total_duration += abs(duration)
         if duration <= 0:
             goal_contacts -= 1
@@ -82,7 +81,7 @@ def solve_binary_linear(input_file: str, dim: int, version: int, use_cached: boo
     return { "max_contacts": goal_contacts, "duration": total_duration }
 
 
-def solve_binary_binary(input_file: str, dim: int, version: int, use_cached: bool = False) -> dict[str, float]:
+def solve_binary_binary(input_file: str, dim: int, v: int, use_cached: bool = False) -> dict[str, float]:
     """
     Start the goal contacts at 1 and then attempt to solve it, doubling the
     goal contacts until it is unsolvable. Then binary search for the largest
@@ -95,7 +94,7 @@ def solve_binary_binary(input_file: str, dim: int, version: int, use_cached: boo
     print(f"Start doubling until {max_contacts = }")
     while goal_contacts <= max_contacts:
         print(f"Solving {goal_contacts}: ", end="", flush=True)
-        duration = solve_sat(input_file, goal_contacts, dim, version, use_cached)
+        duration = solve_sat(input_file, goal_contacts, dim, v, use_cached)
         total_duration += abs(duration)
         if duration <= 0:
             break
@@ -105,12 +104,11 @@ def solve_binary_binary(input_file: str, dim: int, version: int, use_cached: boo
     # Binary search to the maximum possible value
     lo = goal_contacts // 2 + 1
     hi = goal_contacts - 1
-    goal_contacts = (hi + lo) // 2
     print("Start binary search to max contacts")
     while lo <= hi:
         goal_contacts = (hi + lo) // 2
         print(f"Solving {goal_contacts}:", end=" ")
-        duration = solve_sat(input_file, goal_contacts, dim, version, use_cached)
+        duration = solve_sat(input_file, goal_contacts, dim, v, use_cached)
         total_duration += abs(duration)
         if duration > 0:
             lo = goal_contacts + 1
@@ -124,31 +122,31 @@ def solve_binary_binary(input_file: str, dim: int, version: int, use_cached: boo
 def timed_solve(
     input_file: str,
     dim: int,
-    version: int,
+    v: int,
     search: Callable = solve_binary_linear,
     use_cached: bool = False
 ) -> None:
     """Time how long it takes to solve a contact and write it into a file"""
     length = len(get_sequence(input_file))
     filename = input_file.split("/")[-1]
-    results_file = f"{RESULTS_DIR}{filename}_{dim}d_v{version}.csv"
+    results_file = f"{RESULTS_DIR}{filename}_{dim}d_v{v}.csv"
 
     with open(results_file, "w+") as f:
         f.write("length,time,contacts,variables,clauses\n")
     for _ in range(TEST_REPEATS):
-        r = search(input_file, dim, version, use_cached)
-        vars, clauses = get_num_vars_and_clauses(filename, dim, version, r['max_contacts'])
+        r = search(input_file, dim, v, use_cached)
+        v, c = get_num_vars_and_clauses(filename, dim, v, r['max_contacts'])
         print(results_file)
         with open(results_file, "a") as f:
-            f.write(f"{length},{r['duration']},{r['max_contacts']},{vars},{clauses}\n")
+            f.write(f"{length},{r['duration']},{r['max_contacts']},{v},{c}\n")
 
 
-def solve_sat(input_file: str, goal_contacts: int, dim: int, version: int, use_cached: bool = False) -> float:
+def solve_sat(input_file: str, goal_contacts: int, dim: int, v: int, use_cached: bool = False) -> float:
     """
     Run an encoding of the input file, with the target goal of contacts and
     return the duration for solving if it managed
     """
-    file_path = encode(input_file, goal_contacts, dim, version, use_cached=use_cached)
+    file_path = encode(input_file, goal_contacts, dim, v, use_cached=use_cached)
     command = f"kissat {file_path} -q"
     start = time.time()
     output = str(subprocess.run(command.split(), capture_output=True).stdout)
@@ -167,7 +165,7 @@ def encode(
     seq_file: str,
     goal_contacts: int,
     dim: int,
-    version: int,
+    v: int,
     tracked: bool = False,
     use_cached: bool = False
 ) -> str:
@@ -179,7 +177,7 @@ def encode(
     sequence = get_sequence(seq_file)
     base_goal = get_adjacent_ones(sequence)
     w = get_grid_diameter(dim, len(sequence))
-    in_file = f"models/bul/{file_name}_d{dim}_v{version}_{goal_contacts}c.bul"
+    in_file = f"models/bul/{file_name}_d{dim}_v{v}_{goal_contacts}c.bul"
 
     # Number of contacts = adjacent "1"s minus offset
     with open(in_file, "w+") as f:
@@ -190,32 +188,32 @@ def encode(
             f"#ground goal[{(base_goal + goal_contacts)}].\n",
             f"#ground dim[0 .. {dim - 1}].\n"
         ])
-    bule_files = f"{get_encoding_file(dim, version)} bule/cc_a.bul"
-    output = f"models/cnf/{file_name}_{dim}d_v{version}_{goal_contacts}c.cnf"
+    bule_files = f"{get_encoding_file(dim, v)} bule/cc_a.bul"
+    output = f"models/cnf/{file_name}_{dim}d_v{v}_{goal_contacts}c.cnf"
     if not use_cached or not os.path.isfile(output):
         subprocess.run(f"bule2 --output dimacs {bule_files} {in_file} > {output}", shell=True)
 
     if tracked:
-        with open(f"{RESULTS_DIR}{file_name}_{dim}d_{version}.csv", "w+") as f:
-            vars, clauses = get_num_vars_and_clauses(file_name, dim, version, goal_contacts)
+        with open(f"{RESULTS_DIR}{file_name}_{dim}d_{v}.csv", "w+") as f:
+            vars, clauses = get_num_vars_and_clauses(file_name, dim, v, goal_contacts)
             f.write("length,time,contacts,variables,clauses\n")
             f.write(f"{len(sequence)},0,0,{vars},{clauses}")
     return output
 
 
-def get_encoding_file(dim: int, version: int) -> str:
+def get_encoding_file(dim: int, v: int) -> str:
     """Return path to the encoding with the specified dimensiona and version"""
-    if version > 0:
-        return f"bule/constraints_v{version}.bul"
+    if v > 0:
+        return f"bule/constraints_v{v}.bul"
     return f"bule/constraints_{dim}d_v0.bul"
 
 
-def get_num_vars_and_clauses(filename: str, dim: int, version: int, goal_contacts: int) -> tuple[int, int]:
+def get_num_vars_and_clauses(filename: str, dim: int, v: int, goal_contacts: int) -> tuple[int, int]:
     """
     Given the name of the input, return the number of variables and
     clauses in the encoding by reading it from the DIMACS cnf encoded file
     """
-    with open(f"models/cnf/{filename}_{dim}d_v{version}_{goal_contacts}c.cnf") as f:
+    with open(f"models/cnf/{filename}_{dim}d_v{v}_{goal_contacts}c.cnf") as f:
         return tuple(map(int, f.readline().split()[-2:]))
 
 
@@ -246,20 +244,10 @@ def get_max_contacts(s: str, dim: int) -> int:
     n = len(s)
     max_adj = 2 if dim == 2 else 4
     # The maximum number of potential contacts that the ith "1" can have
-    potential_contacts = [max_adj if i == "1" else 0 for i in s ] 
     total = 0
     for i in range(n - 3):
-        # Each "1" can only contact at max 4 (in 2d) or 6 (in 3d) other "1"s 
-        # that are at least 3 indexes away, and an odd distance away
-        if s[i] == "1" and potential_contacts[i] > 0:
-            # Max indexes that this index can contact with on the right
-            for j in range(i+3, n, 2):
-                if potential_contacts[i] == 0:
-                    break
-                if s[j] == "1":
-                    potential_contacts[i] -= 1
-                    potential_contacts[j] -= 1
-                    total += 1
+        if s[i] == "1":
+            total += min(max_adj, s[i+3:n:2].count("1"))
     return total
 
 

@@ -15,22 +15,14 @@ INPUT_DIR = "input"
 OUTPUT = "validate.log"
 
 # List containing tuple of [dimension, version] of the encodings to compare
-ENCODINGS: list[tuple[int, int]] = [
-    (2, 2),
-    (2, 3),
-]
+ENCODINGS: list[tuple[int, int]] = [(2, 0), (2, 2)]
 
 # List containing functions of the different search methods to compare
-FUNCTIONS: list[Callable] = [
-    solve_binary,
-    solve_binary_binary,
-    solve_binary_linear
-]
+FUNCTIONS: list[Callable] = [solve_binary, solve_binary_binary, solve_binary_linear]
 
 # Flag to choose if we compare encodings or methods of search
 COMPARE_ENCODINGS = True
 
-# TODO: Fix script to work with new file naming scheme (i.e. contains dim, version, goal contacts)
 def main():
     vs = []
     cs = []
@@ -49,10 +41,10 @@ def main():
         goal_contacts = 1
         if COMPARE_ENCODINGS:
             for dim, version in ENCODINGS:
-                output = encode(filename, goal_contacts, dim, version, use_cached=True)
+                output = encode(filename, goal_contacts, dim, version, use_cached=False)
                 print(output)
                 v, c = get_num_vars_and_clauses(sequence["filename"], dim, version, goal_contacts)
-                r = solve_binary_linear(filename, dim, version, use_cached=True)
+                r = solve_binary_linear(filename, dim, version, use_cached=False)
                 results.append([version, v, c, r["duration"], r["max_contacts"]])
             print(results)
             a, b = results[0:2]
@@ -66,7 +58,7 @@ def main():
 
             result_str = "\n".join(list(map(str, results)))
             with open(OUTPUT, "a") as f:
-                f.write(f"{filename}\nVersion, Vars, Clauses, Duration, Contacts, {get_max_contacts(sequence['string'], dim)}\n")
+                f.write(f"{filename} {sequence['string']}\nVersion, Vars, Clauses, Duration, Contacts, {get_max_contacts(sequence['string'], dim)}\n")
                 f.write(f"{result_str}\n")
                 f.write(f"Same contacts : {a[4] == b[4]}\n")
                 f.write(f"Leq variables : {variable_diff <= 0} {variable_diff}\n")
@@ -76,7 +68,7 @@ def main():
             DIMENSION = 2
             VERSION = 2
             for func in FUNCTIONS:
-                r = func(filename, DIMENSION, VERSION, use_cached=True)
+                r = func(filename, DIMENSION, VERSION, use_cached=False)
                 results.append([func.__name__, r["duration"], r["max_contacts"]])
                 times[func.__name__] += r["duration"]
             a, b = results[0:2]
