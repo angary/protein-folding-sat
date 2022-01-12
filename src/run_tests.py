@@ -57,18 +57,18 @@ def is_type(filename: str, seq_type: str) -> bool:
     return False
 
 
-def run_test(filename: str, string: str, version: int, dimension: int) -> None:
+def run_test(filename: str, string: str, ver: int, dimension: int) -> None:
     """
     Run a single test using the given filename
     """
     input_file = os.path.join(INPUT_DIR, filename)
     dims = [2, 3] if dimension == 1 else [dimension]
-    versions = VERSIONS if version == -1 else [version]
+    vers = VERSIONS if ver == -1 else [ver]
     with open(input_file) as f:
         seq_len = len(f.readline().removesuffix("\n"))
 
     for dim in dims:
-        for v in versions:
+        for v in vers:
             curr_time = datetime.now().strftime("%H:%M:%S")
             print(f"Testing {input_file}: \t{string} \t{v = } \t{dim = } {curr_time}")
 

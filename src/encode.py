@@ -10,6 +10,8 @@ from src.config import TEST_REPEATS
 
 RESULTS_DIR = "results/encoding/"
 
+
+
 def main() -> None:
     """Extract arguments and determine whether to perform an encoding or solve"""
     args = parse_args()
@@ -33,21 +35,22 @@ def main() -> None:
 
 def solve_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
     """Binary search for max contacts"""
-    total_duration = 0.0
+    total_encode_time, total_solve_time = 0.0, 0.0
     lo, hi = 0, get_max_contacts(get_sequence(seq_file), dim)
     print(f"Start binary search to max contacts from {hi = }")
     while lo <= hi:
         curr = (hi + lo) // 2
         print(f"Solving {curr}:", end=" ", flush=True)
-        duration = solve_sat(seq_file, curr, dim, ver, use_cached)
-        total_duration += abs(duration)
-        if duration > 0:
+        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached)
+        total_encode_time += abs(encode_time)
+        total_solve_time += abs(solve_time)
+        if solve_time > 0:
             lo = curr + 1
         else:
             curr -= 1
             hi = curr
     print()
-    return { "max_contacts": curr, "duration": total_duration }
+    return { "max_contacts": curr, "encode_time": total_encode_time, "solve_time": total_solve_time }
 
 
 def solve_binary_linear(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
@@ -55,13 +58,14 @@ def solve_binary_linear(seq_file: str, dim: int, ver: int, use_cached: bool) -> 
     # Double goal_contacts until it is unsolvable
     curr = 1
     max_contacts = get_max_contacts(get_sequence(seq_file), dim)
-    total_duration = 0.0
+    total_encode_time, total_solve_time = 0.0, 0.0
     print(f"Start doubling until {max_contacts = }")
     while curr <= max_contacts:
         print(f"Solving {curr}: ", end="", flush=True)
-        duration = solve_sat(seq_file, curr, dim, ver, use_cached)
-        total_duration += abs(duration)
-        if duration <= 0:
+        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached)
+        total_encode_time += abs(encode_time)
+        total_solve_time += abs(solve_time)
+        if solve_time <= 0:
             break
         curr *= 2
     print(f"Failed to solve at {curr}\n")
@@ -72,13 +76,14 @@ def solve_binary_linear(seq_file: str, dim: int, ver: int, use_cached: bool) -> 
     while curr < max_contacts:
         curr += 1
         print(f"Solving {curr}:", end=" ", flush=True)
-        duration = solve_sat(seq_file, curr, dim, ver, use_cached)
-        total_duration += abs(duration)
-        if duration <= 0:
+        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached)
+        total_encode_time += abs(encode_time)
+        total_solve_time += abs(solve_time)
+        if solve_time <= 0:
             curr -= 1
             break
     print()
-    return { "max_contacts": curr, "duration": total_duration }
+    return { "max_contacts": curr, "encode_time": total_encode_time, "solve_time": total_solve_time }
 
 
 def solve_binary_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
@@ -88,13 +93,14 @@ def solve_binary_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> 
     # Double goal_contacts until it is unsolvable
     curr = 1
     max_contacts = get_max_contacts(get_sequence(seq_file), dim)
-    total_duration = 0.0
+    total_encode_time, total_solve_time = 0.0, 0.0
     print(f"Start doubling until {max_contacts = }")
     while curr <= max_contacts:
         print(f"Solving {curr}: ", end="", flush=True)
-        duration = solve_sat(seq_file, curr, dim, ver, use_cached)
-        total_duration += abs(duration)
-        if duration <= 0:
+        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached)
+        total_encode_time += abs(encode_time)
+        total_solve_time += abs(solve_time)
+        if solve_time <= 0:
             break
         curr *= 2
     print(f"Failed to solve at {curr}\n")
@@ -105,16 +111,16 @@ def solve_binary_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> 
     while lo <= hi:
         curr = (hi + lo) // 2
         print(f"Solving {curr}:", end=" ")
-        duration = solve_sat(seq_file, curr, dim, ver, use_cached)
-        total_duration += abs(duration)
-        if duration > 0:
+        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached)
+        total_encode_time += abs(encode_time)
+        total_solve_time += abs(solve_time)
+        if solve_time > 0:
             lo = curr + 1
         else:
             curr -= 1
             hi = curr
     print()
-    return { "max_contacts": curr, "duration": total_duration }
-
+    return { "max_contacts": curr, "encode_time": total_encode_time, "solve_time": total_solve_time }
 
 def timed_solve(
     seq_file: str,
@@ -135,24 +141,29 @@ def timed_solve(
         v, c = get_num_vars_and_clauses(filename, dim, ver, r['max_contacts'])
         print(results_file)
         with open(results_file, "a") as f:
-            f.write(f"{length},{r['duration']},{r['max_contacts']},{v},{c}\n")
+            f.write(f"{length},{r['solve_duration']},{r['max_contacts']},{v},{c}\n")
 
 
-def solve_sat(seq_file: str, goal: int, dim: int, ver: int, use_cached: bool) -> float:
-    """Encode input file, with the target goal of contacts and return the duration for solving"""
+def solve_sat(seq_file: str, goal: int, dim: int, ver: int, use_cached: bool) -> tuple[float, float]:
+    """Encode and solve input, then return tuple (encode duration, solve duration)"""
+    start = time.time()
     file_path = encode(seq_file, goal, dim, ver, False, use_cached)
+    encode_duration = time.time() - start
+
     command = f"kissat {file_path} -q"
+
     start = time.time()
     output = str(subprocess.run(command.split(), capture_output=True).stdout)
-    duration = time.time() - start
+    solve_duration = time.time() - start
+
     if "UNSAT" in output:
         print("UNSAT")
-        return -duration
+        return (encode_duration, -solve_duration)
     elif "SAT" in output:
         print("SAT")
-        return duration
+        return (encode_duration, solve_duration)
     print(f"There was a bug in solving with bule. Output: {output}")
-    return 0
+    return (0, 0)
 
 
 def encode(
@@ -182,14 +193,18 @@ def encode(
     # Generate encoding
     bule_files = f"{get_encoding_file(dim, ver)} bule/cc_a.bul"
     output = f"models/cnf/{file_name}_{dim}d_v{ver}_{goal}c.cnf"
+    start = time.time()
     if not use_cached or not os.path.isfile(output):
         subprocess.run(f"bule2 --output dimacs {bule_files} {in_file} > {output}", shell=True)
+        encode_time = time.time() - start
+    else:
+        encode_time = 0
 
     if tracked:
         with open(f"{RESULTS_DIR}{file_name}_{dim}d_v{ver}.csv", "w+") as f:
             vars, clauses = get_num_vars_and_clauses(file_name, dim, ver, goal)
-            f.write("length,time,contacts,variables,clauses\n")
-            f.write(f"{len(seq)},0,0,{vars},{clauses}")
+            f.write("length,encode_time,solve_time,contacts,variables,clauses\n")
+            f.write(f"{len(seq)},{encode_time},0,0,{vars},{clauses}")
     return output
 
 
