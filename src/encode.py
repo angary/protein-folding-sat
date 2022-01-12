@@ -20,12 +20,13 @@ def main() -> None:
     dim = args.dimension
     ver = args.version
     use_cached = args.use_cached
+    search = eval(args.policy)
     if args.solve and args.track:
         print("Attempting to solve and time\n")
-        timed_solve(input_file, dim, ver, solve_binary_linear, use_cached)
+        timed_solve(input_file, dim, ver, search, use_cached)
     elif args.solve:
         print("Attempting to solve\n")
-        print(f"Max contacts: {solve_binary_linear(input_file, dim, ver, use_cached)}")
+        print(f"Max contacts: {search(input_file, dim, ver, use_cached)}")
     else:
         print("Attempting to encode\n")
         file_path = encode(input_file, goal_contacts, dim, ver, False, use_cached)
@@ -59,7 +60,7 @@ def solve_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[st
     }
 
 
-def solve_binary_linear(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
+def solve_double_linear(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
     """Double till UNSAT, then linear search for max contacts"""
     # Double goal_contacts until it is unsolvable
     curr = 1
@@ -98,7 +99,7 @@ def solve_binary_linear(seq_file: str, dim: int, ver: int, use_cached: bool) -> 
         "sat_solve_time": sat_solve_time
     }
 
-def solve_binary_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
+def solve_double_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
     """
     Start the contacts at 1 doubling until unsolvable. Then binary search for the max solvable
     """
@@ -145,7 +146,7 @@ def timed_solve(
     seq_file: str,
     dim: int,
     ver: int,
-    search: Callable = solve_binary_linear,
+    search: Callable = solve_double_linear,
     use_cached: bool = False,
     solver: str = "kissat",
 ) -> None:
@@ -285,14 +286,20 @@ def parse_args() -> argparse.Namespace:
         help="the path to the input file containing a string of 1s and 0s"
     )
     parser.add_argument(
+        "-d", "--dimension",
+        nargs="?", type=int, default=2, choices={2, 3},
+        help="the dimension of the embedding grid, default value: 2"
+    )
+    parser.add_argument(
         "-g", "--goal-contacts",
         nargs="?", type=int, default=1,
         help="the goal number of (H-H) contacts, default value: 1"
     )
     parser.add_argument(
-        "-d", "--dimension",
-        nargs="?", type=int, default=2, choices={2, 3},
-        help="the dimension of the embedding grid, default value: 2"
+        "-p", "--policy",
+        nargs="?", type=str, default="solve_double_linear",
+        choices={"solve_binary", "solve_double_linear", "solve_double_binary"},
+        help="the search policy used to find the maximum number of contacts"
     )
     parser.add_argument(
         "-s", "--solve",

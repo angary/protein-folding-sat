@@ -6,7 +6,7 @@ import os
 from typing import Callable
 
 from src.encode import encode, get_num_vars_and_clauses, solve_binary, \
-    solve_binary_binary, solve_binary_linear, get_max_contacts
+    solve_double_binary, solve_double_linear, get_max_contacts
 from src.run_tests import get_sequences
 
 MIN_LEN = 0
@@ -19,7 +19,7 @@ USE_CACHED = False
 ENCODINGS: list[tuple[int, int]] = [(2, 0), (2, 2)]
 
 # List containing functions of the different search methods to compare
-FUNCTIONS: list[Callable] = [solve_binary, solve_binary_binary, solve_binary_linear]
+FUNCTIONS: list[Callable] = [solve_binary, solve_double_binary, solve_double_linear]
 
 # Flag to choose if we compare encodings or methods of search
 COMPARE_ENCODINGS = True
@@ -46,7 +46,7 @@ def main():
                 output = encode(filename, goal_contacts, dim, version, False, USE_CACHED)
                 print(output)
                 v, c = get_num_vars_and_clauses(sequence["filename"], dim, version, goal_contacts)
-                r = solve_binary_linear(filename, dim, version, USE_CACHED)
+                r = solve_double_linear(filename, dim, version, USE_CACHED)
                 results.append({
                     "ver": version,
                     "vars": v,
