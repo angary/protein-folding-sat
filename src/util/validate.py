@@ -13,6 +13,7 @@ MIN_LEN = 0
 MAX_LEN = 20
 INPUT_DIR = "input"
 OUTPUT = "validate.log"
+USE_CACHED = False
 
 # List containing tuple of [dimension, version] of the encodings to compare
 ENCODINGS: list[tuple[int, int]] = [(2, 0), (2, 2)]
@@ -22,6 +23,7 @@ FUNCTIONS: list[Callable] = [solve_binary, solve_binary_binary, solve_binary_lin
 
 # Flag to choose if we compare encodings or methods of search
 COMPARE_ENCODINGS = True
+
 
 def main():
     vs = []
@@ -41,10 +43,10 @@ def main():
         goal_contacts = 1
         if COMPARE_ENCODINGS:
             for dim, version in ENCODINGS:
-                output = encode(filename, goal_contacts, dim, version, use_cached=False)
+                output = encode(filename, goal_contacts, dim, version, False, USE_CACHED)
                 print(output)
                 v, c = get_num_vars_and_clauses(sequence["filename"], dim, version, goal_contacts)
-                r = solve_binary_linear(filename, dim, version, use_cached=False)
+                r = solve_binary_linear(filename, dim, version, USE_CACHED)
                 results.append([version, v, c, r["duration"], r["max_contacts"]])
             print(results)
             a, b = results[0:2]
@@ -68,7 +70,7 @@ def main():
             DIMENSION = 2
             VERSION = 2
             for func in FUNCTIONS:
-                r = func(filename, DIMENSION, VERSION, use_cached=False)
+                r = func(filename, DIMENSION, VERSION, USE_CACHED)
                 results.append([func.__name__, r["duration"], r["max_contacts"]])
                 times[func.__name__] += r["duration"]
             a, b = results[0:2]

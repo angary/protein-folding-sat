@@ -26,12 +26,12 @@ def main() -> None:
         print(f"Max contacts: {solve_binary_linear(input_file, dim, ver, use_cached)}")
     else:
         print("Attempting to encode\n")
-        file_path = encode(input_file, goal_contacts, dim, ver, use_cached)
+        file_path = encode(input_file, goal_contacts, dim, ver, False, use_cached)
         print(f"Encoding bul    : {file_path.replace('.cnf', '.bul')}")
         print(f"Encoding dimacs : {file_path}")
 
 
-def solve_binary(seq_file: str, dim: int, ver: int, use_cached: bool = False) -> dict[str, float]:
+def solve_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
     """Binary search for max contacts"""
     total_duration = 0.0
     lo, hi = 0, get_max_contacts(get_sequence(seq_file), dim)
@@ -44,13 +44,13 @@ def solve_binary(seq_file: str, dim: int, ver: int, use_cached: bool = False) ->
         if duration > 0:
             lo = curr + 1
         else:
-            hi = curr - 1
             curr -= 1
+            hi = curr
     print()
     return { "max_contacts": curr, "duration": total_duration }
 
 
-def solve_binary_linear(seq_file: str, dim: int, ver: int, use_cached: bool = False) -> dict[str, float]:
+def solve_binary_linear(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
     """Double till UNSAT, then linear search for max contacts"""
     # Double goal_contacts until it is unsolvable
     curr = 1
@@ -81,7 +81,7 @@ def solve_binary_linear(seq_file: str, dim: int, ver: int, use_cached: bool = Fa
     return { "max_contacts": curr, "duration": total_duration }
 
 
-def solve_binary_binary(seq_file: str, dim: int, ver: int, use_cached: bool = False) -> dict[str, float]:
+def solve_binary_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
     """
     Start the contacts at 1 doubling until unsolvable. Then binary search for the max solvable
     """
@@ -131,16 +131,16 @@ def timed_solve(
     with open(results_file, "w+") as f:
         f.write("length,time,contacts,variables,clauses\n")
     for _ in range(TEST_REPEATS):
-        r = search(seq_file, dim, ver, use_cached=use_cached)
+        r = search(seq_file, dim, ver, use_cached)
         v, c = get_num_vars_and_clauses(filename, dim, ver, r['max_contacts'])
         print(results_file)
         with open(results_file, "a") as f:
             f.write(f"{length},{r['duration']},{r['max_contacts']},{v},{c}\n")
 
 
-def solve_sat(seq_file: str, goal: int, dim: int, ver: int, use_cached: bool = False) -> float:
+def solve_sat(seq_file: str, goal: int, dim: int, ver: int, use_cached: bool) -> float:
     """Encode input file, with the target goal of contacts and return the duration for solving"""
-    file_path = encode(seq_file, goal, dim, ver, use_cached=use_cached)
+    file_path = encode(seq_file, goal, dim, ver, False, use_cached)
     command = f"kissat {file_path} -q"
     start = time.time()
     output = str(subprocess.run(command.split(), capture_output=True).stdout)
@@ -160,8 +160,8 @@ def encode(
     goal: int,
     dim: int,
     ver: int,
-    tracked: bool = False,
-    use_cached: bool = False
+    tracked: bool,
+    use_cached: bool
 ) -> str:
     """Generate bule encoding and write it to a file in the models folder that path"""
     file_name = seq_file.split("/")[-1]
