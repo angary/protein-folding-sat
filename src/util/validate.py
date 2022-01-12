@@ -9,7 +9,7 @@ from src.encode import encode, get_num_vars_and_clauses, solve_binary, \
     solve_binary_binary, solve_binary_linear, get_max_contacts
 from src.run_tests import get_sequences
 
-MIN_LEN = 17
+MIN_LEN = 0
 MAX_LEN = 20
 INPUT_DIR = "input"
 OUTPUT = "validate.log"
@@ -58,11 +58,11 @@ def main():
                 })
             a, b = results[0:2]
             variable_diff = (b["vars"] - a["vars"]) / a["vars"]
-            clause_diff = (b["clauses"] - a["clauses"]) / a["clauses"]
+            clause_diff = (b["cls"] - a["cls"]) / a["cls"]
             time_diff = (b["solve_time"] - a["solve_time"]) / a["solve_time"] if min(b["solve_time"], a["solve_time"]) != 0 else 0
 
             vs.append(b["vars"] - a["vars"])
-            cs.append(b["clauses"] - a["clauses"])
+            cs.append(b["cls"] - a["cls"])
             ts.append(b["solve_time"] - a["solve_time"])
 
             result_str = "\n".join(list(map(str, results)))

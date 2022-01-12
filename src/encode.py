@@ -9,7 +9,7 @@ from typing import Callable
 from src.config import TEST_REPEATS
 
 RESULTS_DIR = "results/encoding/"
-
+CSV_HEADER = "length,encode_time,total_time,sat_time,vars,cls,solver,policy"
 
 
 def main() -> None:
@@ -146,7 +146,8 @@ def timed_solve(
     dim: int,
     ver: int,
     search: Callable = solve_binary_linear,
-    use_cached: bool = False
+    use_cached: bool = False,
+    solver: str = "kissat",
 ) -> None:
     """Time how long it takes to solve a contact and write it into a file"""
     length = len(get_sequence(seq_file))
@@ -154,19 +155,30 @@ def timed_solve(
     results_file = f"{RESULTS_DIR}{filename}_{dim}d_v{ver}.csv"
 
     with open(results_file, "w+") as f:
-        f.write("length,time,contacts,variables,clauses\n")
+        f.write(f"{CSV_HEADER}\n")
     for _ in range(TEST_REPEATS):
         r = search(seq_file, dim, ver, use_cached)
         v, c = get_num_vars_and_clauses(filename, dim, ver, r['max_contacts'])
         print(results_file)
         with open(results_file, "a") as f:
-            f.write(f"{length},{r['solve_duration']},{r['max_contacts']},{v},{c}\n")
+            string = ",".join(list(map(str, [
+                length,
+                r["encode_time"],
+                r["solve_time"],
+                r["sat_solve_time"],
+                v,
+                c,
+                solver,
+                search.__name__
+            ])))
+            f.write(f"{string}\n")
 
 
 def solve_sat(seq_file: str, goal: int, dim: int, ver: int, use_cached: bool) -> tuple[float, float]:
     """Encode and solve input, then return tuple (encode duration, solve duration)"""
     start = time.time()
     file_path = encode(seq_file, goal, dim, ver, False, use_cached)
+    print(f"{file_path = }")
     encode_duration = time.time() - start
 
     command = f"kissat {file_path} -q"
@@ -222,8 +234,8 @@ def encode(
     if tracked:
         with open(f"{RESULTS_DIR}{file_name}_{dim}d_v{ver}.csv", "w+") as f:
             vars, clauses = get_num_vars_and_clauses(file_name, dim, ver, goal)
-            f.write("length,encode_time,solve_time,contacts,variables,clauses\n")
-            f.write(f"{len(seq)},{encode_time},0,0,{vars},{clauses}")
+            f.write(f"{CSV_HEADER}\n")
+            f.write(f"{len(seq)},{encode_time},0,0,0,{vars},{clauses},NA,NA")
     return output
 
 

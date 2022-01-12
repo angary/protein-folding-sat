@@ -75,7 +75,7 @@ def run_test(filename: str, string: str, ver: int, dimension: int) -> None:
             # We do not solve using the old encoding if 3D and len > 13
             solve = "" if dim == 3 and seq_len >= 13 and v == 0 else "-s"
 
-            command = f"python3 -m src.encode {input_file} {solve} -t -v {v} -d {dim} -u"
+            command = f"python3 -m src.encode {input_file} {solve} -t -v {v} -d {dim}"
             subprocess.run(command.split(), capture_output=False)
 
 
