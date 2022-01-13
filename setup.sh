@@ -1,7 +1,2 @@
-mkdir results
-mkdir results/search
-mkdir results/solver
-mkdir results/encoding
-mkdir models
-mkdir models/bul
-mkdir models/cnf
+mkdir -p results/{encoding,policy,search}
+mkdir -p models/{bul,cnf}
