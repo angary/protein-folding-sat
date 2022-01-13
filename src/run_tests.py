@@ -27,10 +27,7 @@ def get_sequences(
     min_len: int = 0,
     max_len: int = 100
 ) -> list[dict[str, str]]:
-    """
-    Get a list of dictionaries containing sequences and their filename
-    from the input directory
-    """
+    """Get list of dicts of sequences and their filename from the input dir"""
     sequences = []
     for filename in os.listdir(input_dir_name):
         if filename in IGNORE or not is_type(filename, seq_type):
@@ -45,9 +42,7 @@ def get_sequences(
 
 
 def is_type(filename: str, seq_type: str) -> bool:
-    """
-    Return if a sequence is real, random, or all
-    """
+    """Return if a sequence is real, random, or all (either)"""
     if seq_type == "all":
         return True
     elif seq_type == "real" and re.match("^[a-zA-Z0-9]{6}$", filename):
@@ -75,7 +70,7 @@ def run_test(filename: str, string: str, ver: int, dimension: int) -> None:
             # We do not solve using the old encoding if 3D and len > 13
             solve = "" if dim == 3 and seq_len >= 13 and v == 0 else "-s"
 
-            command = f"python3 -m src.encode {input_file} {solve} -t -v {v} -d {dim} -p solve_double_linear"
+            command = f"python3 -m src.encode {input_file} {solve} -t -v {v} -d {dim} -p binary_search_policy"
             subprocess.run(command.split(), capture_output=False)
 
 

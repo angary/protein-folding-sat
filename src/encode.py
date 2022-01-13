@@ -35,7 +35,7 @@ def main() -> None:
         print(f"Encoding dimacs : {file_path}")
 
 
-def solve_binary(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
+def binary_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
     """Binary search for max contacts"""
     total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
     lo, hi = 0, get_max_contacts(get_sequence(seq_file), dim)
@@ -61,7 +61,7 @@ def solve_binary(seq_file: str, dim: int, ver: int, use_cached: bool, solver: st
     }
 
 
-def solve_double_linear(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
+def double_linear_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
     """Double till UNSAT, then linear search for max contacts"""
     curr = 1
     max_contacts = get_max_contacts(get_sequence(seq_file), dim)
@@ -99,7 +99,7 @@ def solve_double_linear(seq_file: str, dim: int, ver: int, use_cached: bool, sol
     }
 
 
-def solve_double_binary(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
+def double_binary_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
     """
     Start the contacts at 1 doubling until unsolvable. Then binary search for the max solvable
     """
@@ -145,19 +145,21 @@ def timed_solve(
     seq_file: str,
     dim: int,
     ver: int,
-    search: Callable,
+    search_policy: Callable,
     use_cached: bool,
     solver: str
 ) -> None:
     """Time how long it takes to solve a contact and write it into a file"""
     length = len(get_sequence(seq_file))
     filename = seq_file.split("/")[-1]
-    results_file = f"{RESULTS_DIR}{filename}_{dim}d_v{ver}.csv"
+    search_initials = "".join([x[0] for x in search_policy.__name__.split("_")])
+    result_name = f"{filename}_{dim}d_v{ver}_{solver[0]}s_{search_initials}"
+    results_file = f"{os.path.join(RESULTS_DIR, result_name)}.csv"
 
     with open(results_file, "w+") as f:
         f.write(f"{CSV_HEADER}\n")
     for _ in range(TEST_REPEATS):
-        r = search(seq_file, dim, ver, use_cached)
+        r = search_policy(seq_file, dim, ver, use_cached, solver)
         v, c = get_num_vars_and_clauses(filename, dim, ver, r['max_contacts'])
         print(results_file)
         with open(results_file, "a") as f:
@@ -169,7 +171,7 @@ def timed_solve(
                 v,
                 c,
                 solver,
-                search.__name__
+                search_policy.__name__
             ])))
             f.write(f"{string}\n")
 
@@ -204,10 +206,10 @@ def encode(
     use_cached: bool
 ) -> str:
     """Generate bule encoding and write it to a file in the models folder that path"""
-    file_name = seq_file.split("/")[-1]
+    filename = seq_file.split("/")[-1]
     seq = get_sequence(seq_file)
     w = get_grid_diameter(dim, len(seq))
-    in_file = f"models/bul/{file_name}_d{dim}_v{ver}_{goal}c.bul"
+    in_file = f"models/bul/{filename}_d{dim}_v{ver}_{goal}c.bul"
 
     # Number of contacts = adjacent "1"s minus offset
     with open(in_file, "w+") as f:
@@ -221,7 +223,7 @@ def encode(
     
     # Generate encoding
     bule_files = f"{get_encoding_file(dim, ver)} bule/cc_a.bul"
-    output = f"models/cnf/{file_name}_{dim}d_v{ver}_{goal}c.cnf"
+    output = f"models/cnf/{filename}_{dim}d_v{ver}_{goal}c.cnf"
     start = time.time()
     if not use_cached or not os.path.isfile(output):
         subprocess.run(f"bule2 --output dimacs {bule_files} {in_file} > {output}", shell=True)
@@ -230,8 +232,9 @@ def encode(
         encode_time = 0
 
     if tracked:
-        with open(f"{RESULTS_DIR}{file_name}_{dim}d_v{ver}.csv", "w+") as f:
-            vars, clauses = get_num_vars_and_clauses(file_name, dim, ver, goal)
+        result_name = f"{filename}_{dim}d_v{ver}_NAs_NAp"
+        with open(f"{os.path.join(RESULTS_DIR, result_name)}.csv", "w+") as f:
+            vars, clauses = get_num_vars_and_clauses(filename, dim, ver, goal)
             f.write(f"{CSV_HEADER}\n")
             f.write(f"{len(seq)},{encode_time},0,0,0,{vars},{clauses},NA,NA")
     return output
@@ -294,8 +297,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "-p", "--policy",
-        nargs="?", type=str, default="solve_double_linear",
-        choices={"solve_binary", "solve_double_linear", "solve_double_binary"},
+        nargs="?", type=str, default="double_linear_policy",
+        choices={"binary_search_policy", "double_linear_policy", "double_binary_search_policy"},
         help="the search policy used to find the maximum number of contacts"
     )
     parser.add_argument(
