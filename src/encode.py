@@ -20,13 +20,14 @@ def main() -> None:
     dim = args.dimension
     ver = args.version
     use_cached = args.use_cached
-    search = eval(args.policy)
+    policy = eval(args.policy)
+    solver = args.solver
     if args.solve and args.track:
         print("Attempting to solve and time\n")
-        timed_solve(input_file, dim, ver, search, use_cached)
+        timed_solve(input_file, dim, ver, policy, use_cached, solver)
     elif args.solve:
         print("Attempting to solve\n")
-        print(f"Max contacts: {search(input_file, dim, ver, use_cached)}")
+        print(f"Max contacts: {policy(input_file, dim, ver, use_cached, solver)}")
     else:
         print("Attempting to encode\n")
         file_path = encode(input_file, goal_contacts, dim, ver, False, use_cached)
@@ -34,7 +35,7 @@ def main() -> None:
         print(f"Encoding dimacs : {file_path}")
 
 
-def solve_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
+def solve_binary(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
     """Binary search for max contacts"""
     total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
     lo, hi = 0, get_max_contacts(get_sequence(seq_file), dim)
@@ -42,7 +43,7 @@ def solve_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[st
     while lo <= hi:
         curr = (hi + lo) // 2
         print(f"Solving {curr}:", end=" ", flush=True)
-        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached)
+        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached, solver)
         total_encode_time += abs(encode_time)
         total_solve_time += abs(solve_time)
         if solve_time > 0:
@@ -60,16 +61,15 @@ def solve_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[st
     }
 
 
-def solve_double_linear(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
+def solve_double_linear(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
     """Double till UNSAT, then linear search for max contacts"""
-    # Double goal_contacts until it is unsolvable
     curr = 1
     max_contacts = get_max_contacts(get_sequence(seq_file), dim)
     total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
     print(f"Start doubling until {max_contacts = }")
     while curr <= max_contacts:
         print(f"Solving {curr}: ", end="", flush=True)
-        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached)
+        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached, solver)
         total_encode_time += abs(encode_time)
         total_solve_time += abs(solve_time)
         if solve_time <= 0:
@@ -78,13 +78,12 @@ def solve_double_linear(seq_file: str, dim: int, ver: int, use_cached: bool) -> 
         curr *= 2
     print(f"Failed to solve at {curr}\n")
 
-    # Linear search to the maximum possible value
     curr = curr // 2 - 1
     print("Start linear search to max contacts")
     while curr < max_contacts:
         curr += 1
         print(f"Solving {curr}:", end=" ", flush=True)
-        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached)
+        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached, solver)
         total_encode_time += abs(encode_time)
         total_solve_time += abs(solve_time)
         if solve_time <= 0:
@@ -99,18 +98,18 @@ def solve_double_linear(seq_file: str, dim: int, ver: int, use_cached: bool) -> 
         "sat_solve_time": sat_solve_time
     }
 
-def solve_double_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> dict[str, float]:
+
+def solve_double_binary(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
     """
     Start the contacts at 1 doubling until unsolvable. Then binary search for the max solvable
     """
-    # Double goal_contacts until it is unsolvable
     curr = 1
     max_contacts = get_max_contacts(get_sequence(seq_file), dim)
     total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
     print(f"Start doubling until {max_contacts = }")
     while curr <= max_contacts:
         print(f"Solving {curr}: ", end="", flush=True)
-        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached)
+        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached, solver)
         total_encode_time += abs(encode_time)
         total_solve_time += abs(solve_time)
         if solve_time <= 0:
@@ -119,13 +118,12 @@ def solve_double_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> 
         curr *= 2
     print(f"Failed to solve at {curr}\n")
 
-    # Binary search to the maximum possible value
     lo, hi = curr // 2 + 1, curr - 1
     print("Start binary search to max contacts")
     while lo <= hi:
         curr = (hi + lo) // 2
         print(f"Solving {curr}:", end=" ")
-        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached)
+        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached, solver)
         total_encode_time += abs(encode_time)
         total_solve_time += abs(solve_time)
         if solve_time > 0:
@@ -142,13 +140,14 @@ def solve_double_binary(seq_file: str, dim: int, ver: int, use_cached: bool) -> 
         "sat_solve_time": sat_solve_time
     }
 
+
 def timed_solve(
     seq_file: str,
     dim: int,
     ver: int,
-    search: Callable = solve_double_linear,
-    use_cached: bool = False,
-    solver: str = "kissat",
+    search: Callable,
+    use_cached: bool,
+    solver: str
 ) -> None:
     """Time how long it takes to solve a contact and write it into a file"""
     length = len(get_sequence(seq_file))
@@ -175,17 +174,15 @@ def timed_solve(
             f.write(f"{string}\n")
 
 
-def solve_sat(seq_file: str, goal: int, dim: int, ver: int, use_cached: bool) -> tuple[float, float]:
+def solve_sat(seq_file: str, goal: int, dim: int, ver: int, use_cached: bool, solver) -> tuple[float, float]:
     """Encode and solve input, then return tuple (encode duration, solve duration)"""
     start = time.time()
     file_path = encode(seq_file, goal, dim, ver, False, use_cached)
     print(f"{file_path = }")
     encode_duration = time.time() - start
 
-    command = f"kissat {file_path} -q"
-
     start = time.time()
-    output = str(subprocess.run(command.split(), capture_output=True).stdout)
+    output = str(subprocess.run([solver, file_path], capture_output=True).stdout)
     solve_duration = time.time() - start
 
     if "UNSAT" in output:
@@ -307,13 +304,19 @@ def parse_args() -> argparse.Namespace:
         help="solve for the maximum number of contacts"
     )
     parser.add_argument(
+        "--solver",
+        nargs="?", type=str, default="kissat",
+        choices={"glucose", "kissat", "minisat"},
+        help="the SAT solver used"
+    )
+    parser.add_argument(
         "-t", "--track",
         action="store_true",
         help="record details such as time, clauses, etc when a solving an encoding"
     )
     parser.add_argument(
         "-v", "--version",
-        nargs="?", type=int, default=1,
+        nargs="?", type=int, default=2,
         help="Select which encoding version to use"
     )
     parser.add_argument(
