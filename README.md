@@ -31,9 +31,9 @@ The objective of this project is to examine the HP Model of protein folding unde
          Folder with files that contain protein sequences in the HP model
          <ul>
             <li>The number after the <code>v</code> denotes the version of the encoding</li>
-            <li> <code>v0</code> is the original encoding and has one for 2D and 3D embeddings</li>
-            <li> <code>v1</code> is the <code>v0</code> encoding with the dimensionality reduction improvement</li>
-            <li> <code>v2</code> is the <code>v1</code> encoding with the at least improvement</li>
+            <li> <code>v0</code> is the <b>Original Encoding</b> and has one for 2D and 3D embeddings</li>
+            <li> <code>v1</code> is the <b>Dimension Encoding</b> and works for any dimension</li>
+            <li> <code>v2</code> is the <b>Order Encoding</b> (and an improvement of the Dimension Encoding)</li>
          </ul>
       </td>
     </tr>
@@ -48,7 +48,7 @@ The objective of this project is to examine the HP Model of protein folding unde
          <ul>
             <li>The <b>util</b> folder contains helper scripts used for comparing encodings, or visualising embeddings</li>
             <ul>
-              <li>To visualise a grid, run <code>bule2 &lt;model> &lt;constraints> 2> temp.bul; python3 -m src.util.visualise_grid temp.bul</code>
+              <li>To visualise a grid, run <code>bule2 --solve &lt;model> &lt;constraints> 2> temp.bul; python3 -m src.util.visualise_grid temp.bul</code>
             </ul>
          </ul>
       </td>
@@ -58,7 +58,10 @@ The objective of this project is to examine the HP Model of protein folding unde
 
 Note that some of these folders are not tracked by git due to large sizes.
 
-The project uses the [Bule SAT programming language](https://github.com/vale1410/bule) for generating the encodings, and [kissat](https://github.com/arminbiere/kissat) for solving the encodings.
+The project uses the [Bule SAT programming language](https://github.com/vale1410/bule) for generating the encodings, and the following SAT solvers: 
+- [glucose](https://github.com/mi-ki/glucose-syrup)
+- [kissat](https://github.com/arminbiere/kissat)
+- [minisat](https://github.com/niklasso/minisat)
 
 ## Usage
 
@@ -74,8 +77,6 @@ python3 -m src.encode <input_file> -c <contact_count> -d <dimension>
 
 will create a bule encoding inside the `models/bul` directory, and a DIMACS CNF encoding in the `models/cnf` directory.
 
-Adding the `-s` or `--solve` flag will result in a binary search for the maximum number of contacts possible.
-
-Adding the `-t` or `--track` flag will result in storing details such as time, contacts, variables and clauses for solving an encoding in a csv file in the `results` directory.
+Use `python3 -m src.encode -h` for the full list of arguments.
 
 The GitHub repository from the original research paper can be found [here](https://github.com/hannah-aught/prototein-problem).
