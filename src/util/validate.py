@@ -6,20 +6,21 @@ import os
 from typing import Callable
 
 from src.encode import encode, get_num_vars_and_clauses, binary_search_policy, \
-    double_binary_search_policy, double_linear_policy, get_max_contacts
+    double_binary_policy, double_linear_policy, get_max_contacts
 from src.run_tests import get_sequences
 
 MIN_LEN = 0
 MAX_LEN = 20
 INPUT_DIR = "input"
 OUTPUT = "validate.log"
-USE_CACHED = False
+USE_CACHED = True
+SOLVER = "kissat"
 
 # List containing tuple of [dimension, version] of the encodings to compare
 ENCODINGS: list[tuple[int, int]] = [(2, 0), (2, 2)]
 
 # List containing functions of the different search methods to compare
-FUNCTIONS: list[Callable] = [binary_search_policy, double_binary_search_policy, double_linear_policy]
+FUNCTIONS: list[Callable] = [binary_search_policy, double_binary_policy, double_linear_policy]
 
 # Flag to choose if we compare encodings or methods of search
 COMPARE_ENCODINGS = True
@@ -46,7 +47,7 @@ def main():
                 output = encode(filename, goal_contacts, dim, version, False, USE_CACHED)
                 print(output)
                 v, c = get_num_vars_and_clauses(sequence["filename"], dim, version, goal_contacts)
-                r = double_linear_policy(filename, dim, version, USE_CACHED)
+                r = double_linear_policy(filename, dim, version, USE_CACHED, SOLVER)
                 results.append({
                     "ver": version,
                     "vars": v,
@@ -77,7 +78,7 @@ def main():
             DIMENSION = 2
             VERSION = 2
             for func in FUNCTIONS:
-                r = func(filename, DIMENSION, VERSION, USE_CACHED)
+                r = func(filename, DIMENSION, VERSION, USE_CACHED, SOLVER)
                 results.append([func.__name__, r["solve_time"], r["max_contacts"]])
                 times[func.__name__] += r["solve_time"]
             a, b = results[0:2]

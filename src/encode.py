@@ -8,8 +8,8 @@ from typing import Callable
 
 from src.config import TEST_REPEATS
 
-RESULTS_DIR = "results/encoding/"
-CSV_HEADER = "length,encode_time,total_time,sat_time,vars,cls,solver,policy"
+RESULTS_DIR = "results/"
+CSV_HEADER = "length,encode_time,total_time,sat_time,vars,cls"
 
 
 def main() -> None:
@@ -24,6 +24,8 @@ def main() -> None:
     solver = args.solver
     if args.solve and args.track:
         print("Attempting to solve and time\n")
+        global RESULTS_DIR
+        RESULTS_DIR = os.path.join(RESULTS_DIR, args.results_dir)
         timed_solve(input_file, dim, ver, policy, use_cached, solver)
     elif args.solve:
         print("Attempting to solve\n")
@@ -99,7 +101,7 @@ def double_linear_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
     }
 
 
-def double_binary_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
+def double_binary_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
     """
     Start the contacts at 1 doubling until unsolvable. Then binary search for the max solvable
     """
@@ -118,7 +120,8 @@ def double_binary_search_policy(seq_file: str, dim: int, ver: int, use_cached: b
         curr *= 2
     print(f"Failed to solve at {curr}\n")
 
-    lo, hi = curr // 2 + 1, curr - 1
+    curr -= 1
+    lo, hi = curr // 2 + 1, curr
     print("Start binary search to max contacts")
     while lo <= hi:
         curr = (hi + lo) // 2
@@ -145,34 +148,26 @@ def timed_solve(
     seq_file: str,
     dim: int,
     ver: int,
-    search_policy: Callable,
+    policy: Callable,
     use_cached: bool,
     solver: str
 ) -> None:
     """Time how long it takes to solve a contact and write it into a file"""
     length = len(get_sequence(seq_file))
     filename = seq_file.split("/")[-1]
-    search_initials = "".join([x[0] for x in search_policy.__name__.split("_")])
+    search_initials = "".join([x[0] for x in policy.__name__.split("_")])
     result_name = f"{filename}_{dim}d_v{ver}_{solver[0]}s_{search_initials}"
     results_file = f"{os.path.join(RESULTS_DIR, result_name)}.csv"
 
     with open(results_file, "w+") as f:
         f.write(f"{CSV_HEADER}\n")
     for _ in range(TEST_REPEATS):
-        r = search_policy(seq_file, dim, ver, use_cached, solver)
+        r = policy(seq_file, dim, ver, use_cached, solver)
         v, c = get_num_vars_and_clauses(filename, dim, ver, r['max_contacts'])
         print(results_file)
+        results = [length, r["encode_time"], r["solve_time"], r["sat_solve_time"], v, c]
+        string = ",".join(list(map(str, results)))
         with open(results_file, "a") as f:
-            string = ",".join(list(map(str, [
-                length,
-                r["encode_time"],
-                r["solve_time"],
-                r["sat_solve_time"],
-                v,
-                c,
-                solver,
-                search_policy.__name__
-            ])))
             f.write(f"{string}\n")
 
 
@@ -236,7 +231,7 @@ def encode(
         with open(f"{os.path.join(RESULTS_DIR, result_name)}.csv", "w+") as f:
             vars, clauses = get_num_vars_and_clauses(filename, dim, ver, goal)
             f.write(f"{CSV_HEADER}\n")
-            f.write(f"{len(seq)},{encode_time},0,0,0,{vars},{clauses},NA,NA")
+            f.write(f"{len(seq)},{encode_time},0,0,0,{vars},{clauses}")
     return output
 
 
@@ -298,8 +293,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "-p", "--policy",
         nargs="?", type=str, default="double_linear_policy",
-        choices={"binary_search_policy", "double_linear_policy", "double_binary_search_policy"},
+        choices={"binary_search_policy", "double_linear_policy", "double_binary_policy"},
         help="the search policy used to find the maximum number of contacts"
+    )
+    parser.add_argument(
+        "-r", "--results-dir",
+        nargs="?", type=str, default="encoding",
+        choices={"encoding", "policy", "solver"},
+        help="the subfolder within the results directory to store the results"
     )
     parser.add_argument(
         "-s", "--solve",
