@@ -9,7 +9,7 @@ from typing import Callable
 from src.config import TEST_REPEATS
 
 RESULTS_DIR = "results/"
-CSV_HEADER = "length,encode_time,total_time,sat_time,vars,cls"
+CSV_HEADER = "name,len,dim,ver,solver,policy,encode_time,total_time,sat_time,vars,cls"
 
 
 def main() -> None:
@@ -154,8 +154,9 @@ def timed_solve(
 ) -> None:
     """Time how long it takes to solve a contact and write it into a file"""
     length = len(get_sequence(seq_file))
+    pol_name = policy.__name__
     filename = seq_file.split("/")[-1]
-    search_initials = "".join([x[0] for x in policy.__name__.split("_")])
+    search_initials = "".join([x[0] for x in pol_name.split("_")])
     result_name = f"{filename}_{dim}d_v{ver}_{solver[0]}s_{search_initials}"
     results_file = f"{os.path.join(RESULTS_DIR, result_name)}.csv"
 
@@ -165,7 +166,7 @@ def timed_solve(
         r = policy(seq_file, dim, ver, use_cached, solver)
         v, c = get_num_vars_and_clauses(filename, dim, ver, r['max_contacts'])
         print(results_file)
-        results = [length, r["encode_time"], r["solve_time"], r["sat_solve_time"], v, c]
+        results = [filename,length,dim,ver,solver,pol_name,r["encode_time"],r["solve_time"],r["sat_solve_time"],v,c]
         string = ",".join(list(map(str, results)))
         with open(results_file, "a") as f:
             f.write(f"{string}\n")
@@ -229,9 +230,9 @@ def encode(
     if tracked:
         result_name = f"{filename}_{dim}d_v{ver}_NAs_NAp"
         with open(f"{os.path.join(RESULTS_DIR, result_name)}.csv", "w+") as f:
-            vars, clauses = get_num_vars_and_clauses(filename, dim, ver, goal)
+            vars, cls = get_num_vars_and_clauses(filename, dim, ver, goal)
             f.write(f"{CSV_HEADER}\n")
-            f.write(f"{len(seq)},{encode_time},0,0,0,{vars},{clauses}")
+            f.write(f"{filename},{len(seq)},{dim},{ver},NA,NA,{encode_time},0,0,0,{vars},{cls}")
     return output
 
 

@@ -6,6 +6,7 @@ from datetime import datetime
 
 from src.config import TEST_VERSIONS as VERSIONS
 
+
 MAX_LEN = 23
 INPUT_DIR = "./input"
 IGNORE: list[str] = []
@@ -56,7 +57,7 @@ def run_test(input_file: str, seq: str, v: int, d: int, solver: str, policy: str
     solve = "" if d == 3 and len(seq) >= 13 and v == 0 else "-s"
 
     command = f"python3 -m src.encode {input_file}"
-    options = f"{solve} -t -v {v} -d {d} -p {policy} --solver {solver} -r {dir}"
+    options = f"{solve} -t -u -v {v} -d {d} -p {policy} --solver {solver} -r {dir}"
     subprocess.run((command + " " + options).split(), capture_output=False)
 
 
