@@ -17,7 +17,7 @@ USE_CACHED = True
 SOLVER = "kissat"
 
 # List containing tuple of [dimension, version] of the encodings to compare
-ENCODINGS: list[tuple[int, int]] = [(2, 0), (2, 2)]
+ENCODINGS: list[tuple[int, int]] = [(2, 2), (2, 3)]
 
 # List containing functions of the different search methods to compare
 FUNCTIONS: list[Callable] = [binary_search_policy, double_binary_policy, double_linear_policy]
