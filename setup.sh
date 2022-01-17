@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "Making models and results directory"
 mkdir -p models/{bul,cnf}
 mkdir -p results/{encoding,policy,search}
