@@ -68,7 +68,7 @@ def main():
 
             result_str = "\n".join(list(map(str, results)))
             with open(OUTPUT, "a") as f:
-                f.write(f"{filename = } | Max contacts = {get_max_contacts(sequence['string'], dim)}\n")
+                f.write(f"{filename = } | Max contacts = {get_max_contacts(sequence['seq'], dim)}\n")
                 f.write(f"{result_str}\n")
                 f.write(f"Same contacts : {a['contacts'] == b['contacts']}\n")
                 f.write(f"Leq variables : {variable_diff <= 0} {variable_diff}\n")
@@ -84,7 +84,7 @@ def main():
             a, b = results[0:2]
             time_diff = (b[1] - a[1]) / a[1] if min(b[1], a[1]) != 0 else 0
             with open(OUTPUT, "a") as f:
-                f.write(f"{filename}\nFunction, Duration, Contacts, Max Contacts: {get_max_contacts(sequence['string'], DIMENSION)}\n")
+                f.write(f"{filename}\nFunction, Duration, Contacts, Max Contacts: {get_max_contacts(sequence['seq'], DIMENSION)}\n")
                 f.write("\n".join(list(map(str, results))) + "\n")
                 # f.write(f"Less time     : {time_diff}")
                 f.write(f"Same contacts : {len(set(list(zip(*results))[2])) == 1}\n\n")
