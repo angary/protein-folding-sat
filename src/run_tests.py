@@ -6,7 +6,7 @@ import subprocess
 from datetime import datetime
 
 import src.encode as encode
-from src.config import TEST_VERSIONS as VERSIONS
+from src.config import TEST_VERSIONS as VERSIONS, SAT_TEST_SEQ
 
 
 MAX_LEN = 23
@@ -14,7 +14,6 @@ INPUT_DIR = "./input"
 IGNORE: list[str] = []
 POLICIES = ["binary_search_policy", "double_binary_policy", "double_linear_policy"]
 SOLVERS = ["glucose", "kissat", "minisat"]
-SAT_TEST_SEQ = "input/length-20-1"
 
 def main() -> None:
     args = parse_args()
