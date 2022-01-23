@@ -1,10 +1,13 @@
 import argparse
+import json
 import os
 import re
 import subprocess
 from datetime import datetime
 
-from src.config import TEST_VERSIONS as VERSIONS
+import src.encode as encode
+from src.config import TEST_VERSIONS as VERSIONS, SAT_TEST_SEQ
+
 
 MAX_LEN = 23
 INPUT_DIR = "./input"
@@ -16,6 +19,9 @@ def main() -> None:
     args = parse_args()
     dims = [2, 3] if args.dimension == -1 else [args.dimension]
     vers = VERSIONS if args.version == -1 else [args.version]
+    if args.test_type == "sat":
+        run_sat_test(SAT_TEST_SEQ, 2)
+        return print("Finished")
     for s in get_sequences(INPUT_DIR, args.sequence_type, args.min_len, MAX_LEN):
         print(s)
         match args.test_type:
@@ -24,7 +30,9 @@ def main() -> None:
             case "policy":
                 run_policy_test(s["filename"], s["seq"])
             case "solver":
-                pass
+                print("Not implemented yet")
+                print("Solvers have been compared in the policy test")
+                print("In terms of performance: kissat > glucose >> minisat")
     print("Finished")
 
 
@@ -46,6 +54,64 @@ def run_encoding_test(filename: str, seq: str, vers: list[int], dims: list[int])
     for d in dims:
         for v in vers:
             run_test(input_file, seq, v, d, "kissat", "double_linear_policy", "encoding")
+
+
+def run_sat_test(input_file: str, dim: int) -> None:
+    # Check how long it takes to run all the tests
+    seq = encode.get_sequence(input_file)
+    max_contacts = encode.get_max_contacts(seq, dim)
+    times = []
+    goal_contacts = 0
+    for i in range(max_contacts):
+        goal = i + 1
+        time = encode.solve_sat(input_file, goal, dim, 2, True, "kissat")[1]
+        if time > 0:
+            goal_contacts = goal
+        times.append(abs(time))
+    
+    res_file = input_file.replace("input", "results/sat") + ".json"
+    result = {
+        "input_file": input_file,
+        "dim": dim,
+        "times": times,
+        "binary_search_policy": get_binary_search_policy_searches(0, max_contacts, goal_contacts),
+        "double_linear_policy": get_double_linear_policy_searches(goal_contacts),
+        "double_binary_policy": get_double_binary_policy_searches(goal_contacts)
+    }
+    with open(res_file, "w+") as f:
+        json.dump(result, f, indent=4)
+
+
+def get_binary_search_policy_searches(lo: int, hi: int, goal: int) -> list[int]:
+    searches = []
+    while lo <= hi:
+        curr = (hi + lo) // 2
+        searches.append(curr)
+        if curr > goal: # Too high
+            hi = curr - 1
+        else: # Too low
+            lo = curr + 1
+    return searches
+
+
+def get_double_linear_policy_searches(goal: int) -> list[int]:
+    searches = []
+    i = 1
+    while i < goal:
+        searches.append(i)
+        i *= 2
+    searches.append(i)
+    return searches + [j + 1 for j in range(i // 2, goal + 1)]
+
+
+def get_double_binary_policy_searches(goal: int) -> list[int]:
+    searches = []
+    i = 1
+    while i < goal:
+        searches.append(i)
+        i *= 2
+    searches.append(i)
+    return searches + get_binary_search_policy_searches(i // 2, i, goal)
 
 
 def run_test(input_file: str, seq: str, v: int, d: int, solver: str, policy: str, dir: str) -> None:
@@ -116,7 +182,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "-t", "--test-type",
-        nargs="?", type=str, default="encoding", choices={"encoding", "policy", "solver"},
+        nargs="?", type=str, default="encoding", choices={"encoding", "policy", "sat", "solver"},
         help="which independent variable to test"
     )
     parser.add_argument(
