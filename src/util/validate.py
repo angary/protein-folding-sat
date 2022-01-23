@@ -9,7 +9,7 @@ from src.encode import encode, get_num_vars_and_clauses, binary_search_policy, \
     double_binary_policy, double_linear_policy, get_max_contacts
 from src.run_tests import get_sequences
 
-MIN_LEN = 0
+MIN_LEN = 13
 MAX_LEN = 20
 INPUT_DIR = "input"
 OUTPUT = "validate.log"
@@ -17,7 +17,7 @@ USE_CACHED = True
 SOLVER = "kissat"
 
 # List containing tuple of [dimension, version] of the encodings to compare
-ENCODINGS: list[tuple[int, int]] = [(2, 2), (2, 3)]
+ENCODINGS: list[tuple[int, int]] = [(2, 1), (2, 2)]
 
 # List containing functions of the different search methods to compare
 FUNCTIONS: list[Callable] = [binary_search_policy, double_binary_policy, double_linear_policy]

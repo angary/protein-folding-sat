@@ -148,12 +148,15 @@ cython_debug/
 practise/
 temp*
 
-# Produced Binary Sequences
-models/*
-!models/**/*.gitkeep
+# Generated models and extracted inputs
+input/
+models/
 
 # Dataset folder from zip
 Dataset/
 
 # Ignore results for now
 results/*
+images/*
+*.csv
+
