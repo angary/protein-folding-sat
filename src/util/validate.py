@@ -9,15 +9,15 @@ from src.encode import encode, get_num_vars_and_clauses, binary_search_policy, \
     double_binary_policy, double_linear_policy, get_max_contacts
 from src.run_tests import get_sequences
 
-MIN_LEN = 13
-MAX_LEN = 20
+MIN_LEN = 20
+MAX_LEN = 21
 INPUT_DIR = "input"
 OUTPUT = "validate.log"
 USE_CACHED = True
 SOLVER = "kissat"
 
 # List containing tuple of [dimension, version] of the encodings to compare
-ENCODINGS: list[tuple[int, int]] = [(2, 1), (2, 2)]
+ENCODINGS: list[tuple[int, int]] = [(2, 2)]
 
 # List containing functions of the different search methods to compare
 FUNCTIONS: list[Callable] = [binary_search_policy, double_binary_policy, double_linear_policy]
@@ -57,23 +57,26 @@ def main():
                     "sat_time": round(r["sat_solve_time"], 4),
                     "contacts": r["max_contacts"]
                 })
-            a, b = results[0:2]
-            variable_diff = (b["vars"] - a["vars"]) / a["vars"]
-            clause_diff = (b["cls"] - a["cls"]) / a["cls"]
-            time_diff = (b["solve_time"] - a["solve_time"]) / a["solve_time"] if min(b["solve_time"], a["solve_time"]) != 0 else 0
+            if len(ENCODINGS) > 1:
+                a, b = results[0:2]
+                variable_diff = (b["vars"] - a["vars"]) / a["vars"]
+                clause_diff = (b["cls"] - a["cls"]) / a["cls"]
+                time_diff = (b["solve_time"] - a["solve_time"]) / a["solve_time"] if min(b["solve_time"], a["solve_time"]) != 0 else 0
 
-            vs.append(b["vars"] - a["vars"])
-            cs.append(b["cls"] - a["cls"])
-            ts.append(b["solve_time"] - a["solve_time"])
+                vs.append(b["vars"] - a["vars"])
+                cs.append(b["cls"] - a["cls"])
+                ts.append(b["solve_time"] - a["solve_time"])
 
             result_str = "\n".join(list(map(str, results)))
             with open(OUTPUT, "a") as f:
                 f.write(f"{filename = } | Max contacts = {get_max_contacts(sequence['seq'], dim)}\n")
                 f.write(f"{result_str}\n")
-                f.write(f"Same contacts : {a['contacts'] == b['contacts']}\n")
-                f.write(f"Leq variables : {variable_diff <= 0} {variable_diff}\n")
-                f.write(f"Leq clauses   : {clause_diff <= 0} {clause_diff}\n")
-                f.write(f"Less time     : {time_diff <= 0} {time_diff}\n\n")
+                if len(ENCODINGS) > 1:
+                    f.write(f"Same contacts : {a['contacts'] == b['contacts']}\n")
+                    f.write(f"Leq variables : {variable_diff <= 0} {variable_diff}\n")
+                    f.write(f"Leq clauses   : {clause_diff <= 0} {clause_diff}\n")
+                    f.write(f"Less time     : {time_diff <= 0} {time_diff}\n")
+                f.write("\n")
         else:
             DIMENSION = 2
             VERSION = 2
@@ -89,7 +92,7 @@ def main():
                 # f.write(f"Less time     : {time_diff}")
                 f.write(f"Same contacts : {len(set(list(zip(*results))[2])) == 1}\n\n")
     
-    if COMPARE_ENCODINGS:
+    if COMPARE_ENCODINGS and len(ENCODINGS) > 1:
         with open(OUTPUT, "a") as f:
             f.write("\n\n")
             f.write(f"Avg variables -> {sum(vs) / len(vs)}\n")
