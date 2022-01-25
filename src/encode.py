@@ -1,5 +1,7 @@
 """Take in a string of 1s and 0s and convert it into a bul encoding"""
 
+from __future__ import annotations
+
 import argparse
 import os
 import subprocess

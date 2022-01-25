@@ -2,6 +2,8 @@
 Check that when solving using the following encodings, they produce the
 same number of max contacts.
 """
+from __future__ import annotations
+
 import os
 from typing import Callable
 

@@ -2,6 +2,8 @@
 # Generates binary sequence files for each file in the Dataset directory
 # These input files can later be used for the HPsat and pipeline programs
 
+from __future__ import annotations
+
 import os
 
 from pathlib import Path

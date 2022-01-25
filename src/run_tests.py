@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import json
 import os
@@ -24,15 +26,14 @@ def main() -> None:
         return print("Finished")
     for s in get_sequences(INPUT_DIR, args.sequence_type, args.min_len, MAX_LEN):
         print(s)
-        match args.test_type:
-            case "encoding":
-                run_encoding_test(s["filename"], s["seq"], vers, dims)
-            case "policy":
-                run_policy_test(s["filename"], s["seq"])
-            case "solver":
-                print("Not implemented yet")
-                print("Solvers have been compared in the policy test")
-                print("In terms of performance: kissat > glucose >> minisat")
+        if args.test_type == "encoding":
+            run_encoding_test(s["filename"], s["seq"], vers, dims)
+        elif args.test_type == "policy":
+            run_policy_test(s["filename"], s["seq"])
+        elif args.test_type == "solver":
+            print("Not implemented yet")
+            print("Solvers have been compared in the policy test")
+            print("In terms of performance: kissat > glucose >> minisat")
     print("Finished")
 
 
