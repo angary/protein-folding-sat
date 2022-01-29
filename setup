@@ -7,7 +7,7 @@ echo
 
 
 echo "Checking SAT solvers"
-declare -a solvers=("glucose" "kissat" "minisat")
+declare -a solvers=("cadical" "cryptominisat" "glucose" "kissat" "maplesat")
 passed=0
 for i in "${solvers[@]}"
 do
@@ -57,7 +57,7 @@ do
         rm input/$f
     fi
 done
-echo 
+echo
 
 
 echo "Done"

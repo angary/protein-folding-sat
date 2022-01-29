@@ -8,7 +8,7 @@ import subprocess
 import time
 from typing import Callable
 
-from src.config import TEST_REPEATS
+from src.config import TEST_REPEATS, SOLVERS
 from src.search_policies import *
 
 RESULTS_DIR = "results/"
@@ -36,7 +36,7 @@ def main() -> None:
     else:
         print("Attempting to encode\n")
         file_path = encode(input_file, goal_contacts, dim, ver, False, use_cached)
-        print(f"Encoding bul    : {file_path.replace('.cnf', '.bul')}")
+        print(f"Encoding bul    : {file_path.replace('cnf', 'bul')}")
         print(f"Encoding dimacs : {file_path}")
 
 
@@ -52,13 +52,15 @@ def timed_solve(
     length = len(get_sequence(seq_file))
     filename = seq_file.split("/")[-1]
     search_initials = "".join([x[0] for x in policy.__name__.split("_")])
-    result_name = f"{filename}_{dim}d_v{ver}_{solver[0]}s_{search_initials}"
+    result_name = f"{filename}_{dim}d_v{ver}_{solver[:2]}s_{search_initials}"
     results_file = f"{os.path.join(RESULTS_DIR, result_name)}.csv"
 
     with open(results_file, "w+") as f:
         f.write(f"{CSV_HEADER}\n")
     for _ in range(TEST_REPEATS):
+        print(policy.__name__)
         r = policy(seq_file, dim, ver, use_cached, solver)
+        print(r["max_contacts"])
         v, c = get_num_vars_and_clauses(filename, dim, ver, r['max_contacts'])
         print(results_file)
         results = [length, r["encode_time"], r["solve_time"], r["sat_solve_time"], v, c]
@@ -71,7 +73,7 @@ def solve_sat(seq_file: str, goal: int, dim: int, ver: int, use_cached: bool, so
     """Encode and solve input, then return tuple (encode duration, solve duration)"""
     start = time.time()
     file_path = encode(seq_file, goal, dim, ver, False, use_cached)
-    print(f"{file_path = }")
+    print(f"filepath: {file_path}")
     encode_duration = time.time() - start
 
     start = time.time()
@@ -105,7 +107,9 @@ def encode(
     # Number of contacts = adjacent "1"s minus offset
     with open(in_file, "w+") as f:
         f.write(f"% {seq}\n\n")
-        f.writelines([f"#ground sequence[{i}, {c}].\n" for i, c in enumerate(seq)] + ["\n"])
+        f.writelines(
+            [f"#ground sequence[{i}, {c}].\n" for i, c in enumerate(seq)] + ["\n"]
+        )
         f.writelines([
             f"#ground width[{w}].\n",
             f"#ground goal[{(get_adjacent_ones(seq) + goal)}].\n",
@@ -136,13 +140,14 @@ def get_encoding_file(dim: int, v: int) -> str:
 
 
 def get_num_vars_and_clauses(filename: str, dim: int, v: int, goal: int) -> tuple[int, int]:
-    with open(f"models/cnf/{filename}_{dim}d_v{v}_{goal}c.cnf") as f:
+    with open(f"models/cnf/{filename}_{dim}d_v{v}_{goal}c.cnf", "r") as f:
         return tuple(map(int, f.readline().split()[-2:]))
 
 
 def get_sequence(seq_file: str) -> str:
     with open(seq_file, "r") as f:
-        return f.readline().removesuffix("\n")
+        # Return the last "\n"
+        return f.readline()[:-1]
 
 
 def get_adjacent_ones(s: str) -> int:
@@ -151,12 +156,8 @@ def get_adjacent_ones(s: str) -> int:
 
 def get_grid_diameter(dim: int, n: int) -> int:
     if dim == 2:
-        if n >= 12:
-            return 1 + n // 4
-        return n
-    if n >= 20:
-        return 2 + n // 8
-    return 2 + n // 4
+        return 1 + n // 4 if n >= 12 else n
+    return 2 + n // 8 if n >= 20 else 2 + n // 4
 
 
 def get_max_contacts(s: str, dim: int) -> int:
@@ -189,7 +190,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "-p", "--policy",
         nargs="?", type=str, default="double_linear_policy",
-        choices={"binary_search_policy", "double_linear_policy", "double_binary_policy"},
+        choices={"binary_search_policy", "linear_search_policy", "double_binary_policy", "double_linear_policy"},
         help="the search policy used to find the maximum number of contacts"
     )
     parser.add_argument(
@@ -206,7 +207,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--solver",
         nargs="?", type=str, default="kissat",
-        choices={"glucose", "kissat", "minisat"},
+        choices=set(SOLVERS),
         help="the SAT solver used"
     )
     parser.add_argument(

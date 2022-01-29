@@ -13,7 +13,7 @@ def binary_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
     total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
     lo, hi = 0, src.encode.get_max_contacts(
         src.encode.get_sequence(seq_file), dim)
-    print(f"Start binary search to max contacts from {hi = }")
+    print(f"Start binary search to max contacts from hi: {hi}")
     while lo <= hi:
         curr = (hi + lo) // 2
         print(f"Solving {curr}:", end=" ", flush=True)
@@ -42,7 +42,7 @@ def linear_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
     total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
     curr, max_contacts = 1, src.encode.get_max_contacts(
         src.encode.get_sequence(seq_file), dim)
-    print(f"Start linear search to {max_contacts = }")
+    print(f"Start linear search to max contacts: {max_contacts}")
     while curr < max_contacts:
         curr += 1
         print(f"Solving {curr}:", end=" ", flush=True)
@@ -72,7 +72,7 @@ def double_binary_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
     max_contacts = src.encode.get_max_contacts(
         src.encode.get_sequence(seq_file), dim)
     total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
-    print(f"Start doubling until {max_contacts = }")
+    print(f"Start doubling until max contacts: {max_contacts}")
     while curr <= max_contacts:
         print(f"Solving {curr}: ", end="", flush=True)
         encode_time, solve_time = src.encode.solve_sat(
@@ -118,7 +118,7 @@ def double_linear_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
     max_contacts = src.encode.get_max_contacts(
         src.encode.get_sequence(seq_file), dim)
     total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
-    print(f"Start doubling until {max_contacts = }")
+    print(f"Start doubling until max contacts: {max_contacts}")
     while curr <= max_contacts:
         print(f"Solving {curr}: ", end="", flush=True)
         encode_time, solve_time = src.encode.solve_sat(

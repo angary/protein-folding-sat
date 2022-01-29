@@ -59,7 +59,7 @@ def main():
 
 def get_sequence_embedding(filepath: str) -> str:
     with open(filepath) as f:
-        line = f.readlines()[-1]
+        line = f.readlines()[:-1]
 
         if re.match(r"x\(\d,\d,\d\)", line):
             # v1 encoding

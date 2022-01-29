@@ -9,13 +9,14 @@ from datetime import datetime
 
 import src.encode as encode
 from src.config import TEST_VERSIONS as VERSIONS, SAT_TEST_SEQ
+SOLVERS = ["kissat", "glucose"]
 
 
 MAX_LEN = 23
 INPUT_DIR = "./input"
 IGNORE: list[str] = []
 POLICIES = ["binary_search_policy", "double_binary_policy", "double_linear_policy"]
-SOLVERS = ["glucose", "kissat", "minisat"]
+
 
 def main() -> None:
     args = parse_args()
@@ -29,23 +30,23 @@ def main() -> None:
         if args.test_type == "encoding":
             run_encoding_test(s["filename"], s["seq"], vers, dims)
         elif args.test_type == "policy":
-            run_policy_test(s["filename"], s["seq"])
+            run_policy_test(s["filename"], s["seq"], dims)
         elif args.test_type == "solver":
             print("Not implemented yet")
             print("Solvers have been compared in the policy test")
-            print("In terms of performance: kissat > glucose >> minisat")
     print("Finished")
 
 
-def run_policy_test(filename: str, seq: str) -> None:
+def run_policy_test(filename: str, seq: str, dims: list[int]) -> None:
     """For the file run a search using different policies"""
     input_file = os.path.join(INPUT_DIR, filename)
 
-    # Run test with just kissat and all policies
+    # Run test with each combination of policy, solver, and version
     for policy in POLICIES:
         for solver in SOLVERS:
             for v in VERSIONS:
-                run_test(input_file, seq, v, 2, solver, policy, "policy")
+                for d in dims:
+                    run_test(input_file, seq, v, d, solver, policy, "policy")
 
 
 def run_encoding_test(filename: str, seq: str, vers: list[int], dims: list[int]) -> None:
@@ -118,7 +119,7 @@ def get_double_binary_policy_searches(goal: int) -> list[int]:
 def run_test(input_file: str, seq: str, v: int, d: int, solver: str, policy: str, dir: str) -> None:
     
     curr_time = datetime.now().strftime("%H:%M:%S")
-    print(f"Testing {input_file}: \t{seq} \t{v = } \t{d = } {curr_time}")
+    print(f"Testing {input_file}: \t{seq} \tv: {v} \td: {d} {curr_time}")
     # We do not solve using the old encoding if 3D and len > 13
     solve = "" if d == 3 and len(seq) >= 13 and v == 0 else "-s"
 
@@ -141,7 +142,7 @@ def get_sequences(
 
         filepath = os.path.join(input_dir_name, filename)
         with open(filepath) as f:
-            sequences.append({"filename": filename, "seq": f.read().removesuffix("\n")})
+            sequences.append({"filename": filename, "seq": get_sequence(filename)})
     # Sort sequence by shortest sequence first
     sequences = [s for s in sequences if len(s["seq"]) >= min_len and len(s["seq"]) < max_len]
     return sorted(sequences, key=lambda x: (len(x["seq"]), x["filename"]))
@@ -150,7 +151,8 @@ def get_sequences(
 def get_sequence(filename: str) -> str:
     input_file = os.path.join(INPUT_DIR, filename)
     with open(input_file) as f:
-        return f.readline().removeprefix("\n")
+        # Remove the last "\n"
+        return f.readline()[:-1]
 
 
 def is_type(filename: str, seq_type: str) -> bool:
