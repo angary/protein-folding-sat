@@ -3,29 +3,30 @@ Check that when solving using the following encodings, they produce the
 same number of max contacts.
 """
 from __future__ import annotations
+from src.run_tests import get_sequences
 
 import os
 from typing import Callable
 
-from src.encode import encode, get_num_vars_and_clauses, binary_search_policy, \
-    double_binary_policy, double_linear_policy, get_max_contacts
-from src.run_tests import get_sequences
+from src.encode import encode, get_num_vars_and_clauses, get_max_contacts
+from src.search_policies import *
 
-MIN_LEN = 20
-MAX_LEN = 21
+MIN_LEN = 13
+MAX_LEN = 25
 INPUT_DIR = "input"
 OUTPUT = "validate.log"
 USE_CACHED = True
 SOLVER = "kissat"
 
 # List containing tuple of [dimension, version] of the encodings to compare
-ENCODINGS: list[tuple[int, int]] = [(2, 2)]
+ENCODINGS = [(2, 2)]
 
 # List containing functions of the different search methods to compare
-FUNCTIONS: list[Callable] = [binary_search_policy, double_binary_policy, double_linear_policy]
+FUNCTIONS = [binary_search_policy, linear_search_policy,
+             double_binary_policy, double_linear_policy]
 
 # Flag to choose if we compare encodings or methods of search
-COMPARE_ENCODINGS = True
+COMPARE_ENCODINGS = False
 
 
 def main():
@@ -46,10 +47,13 @@ def main():
         goal_contacts = 1
         if COMPARE_ENCODINGS:
             for dim, version in ENCODINGS:
-                output = encode(filename, goal_contacts, dim, version, False, USE_CACHED)
+                output = encode(filename, goal_contacts, dim,
+                                version, False, USE_CACHED)
                 print(output)
-                v, c = get_num_vars_and_clauses(sequence["filename"], dim, version, goal_contacts)
-                r = double_linear_policy(filename, dim, version, USE_CACHED, SOLVER)
+                v, c = get_num_vars_and_clauses(
+                    sequence["filename"], dim, version, goal_contacts)
+                r = double_linear_policy(
+                    filename, dim, version, USE_CACHED, SOLVER)
                 results.append({
                     "ver": version,
                     "vars": v,
@@ -63,7 +67,9 @@ def main():
                 a, b = results[0:2]
                 variable_diff = (b["vars"] - a["vars"]) / a["vars"]
                 clause_diff = (b["cls"] - a["cls"]) / a["cls"]
-                time_diff = (b["solve_time"] - a["solve_time"]) / a["solve_time"] if min(b["solve_time"], a["solve_time"]) != 0 else 0
+                time_diff = (b["solve_time"] - a["solve_time"]) / \
+                    a["solve_time"] if min(
+                    b["solve_time"], a["solve_time"]) != 0 else 0
 
                 vs.append(b["vars"] - a["vars"])
                 cs.append(b["cls"] - a["cls"])
@@ -71,12 +77,16 @@ def main():
 
             result_str = "\n".join(list(map(str, results)))
             with open(OUTPUT, "a") as f:
-                f.write(f"{filename = } | Max contacts = {get_max_contacts(sequence['seq'], dim)}\n")
+                f.write(
+                    f"{filename = } | Max contacts = {get_max_contacts(sequence['seq'], dim)}\n")
                 f.write(f"{result_str}\n")
                 if len(ENCODINGS) > 1:
-                    f.write(f"Same contacts : {a['contacts'] == b['contacts']}\n")
-                    f.write(f"Leq variables : {variable_diff <= 0} {variable_diff}\n")
-                    f.write(f"Leq clauses   : {clause_diff <= 0} {clause_diff}\n")
+                    f.write(
+                        f"Same contacts : {a['contacts'] == b['contacts']}\n")
+                    f.write(
+                        f"Leq variables : {variable_diff <= 0} {variable_diff}\n")
+                    f.write(
+                        f"Leq clauses   : {clause_diff <= 0} {clause_diff}\n")
                     f.write(f"Less time     : {time_diff <= 0} {time_diff}\n")
                 f.write("\n")
         else:
@@ -84,16 +94,19 @@ def main():
             VERSION = 2
             for func in FUNCTIONS:
                 r = func(filename, DIMENSION, VERSION, USE_CACHED, SOLVER)
-                results.append([func.__name__, r["solve_time"], r["max_contacts"]])
+                results.append(
+                    [func.__name__, r["solve_time"], r["max_contacts"]])
                 times[func.__name__] += r["solve_time"]
             a, b = results[0:2]
             time_diff = (b[1] - a[1]) / a[1] if min(b[1], a[1]) != 0 else 0
             with open(OUTPUT, "a") as f:
-                f.write(f"{filename}\nFunction, Duration, Contacts, Max Contacts: {get_max_contacts(sequence['seq'], DIMENSION)}\n")
+                f.write(
+                    f"{filename}\nFunction, Duration, Contacts, Max Contacts: {get_max_contacts(sequence['seq'], DIMENSION)}\n")
                 f.write("\n".join(list(map(str, results))) + "\n")
                 # f.write(f"Less time     : {time_diff}")
-                f.write(f"Same contacts : {len(set(list(zip(*results))[2])) == 1}\n\n")
-    
+                f.write(
+                    f"Same contacts : {len(set(list(zip(*results))[2])) == 1}\n\n")
+
     if COMPARE_ENCODINGS and len(ENCODINGS) > 1:
         with open(OUTPUT, "a") as f:
             f.write("\n\n")

@@ -5,4 +5,4 @@ TEST_REPEATS = 1
 TEST_VERSIONS = [0, 1, 2]
 
 # File to use for SAT test
-SAT_TEST_SEQ = "input/length-20-1"
+SAT_TEST_SEQ = "input/length-23-7"

@@ -1,4 +1,4 @@
-"""Take in a string of 1s and 0s and convert it into a bul encoding"""
+"""Take in a string of 1s and 0s and convert it into a bule & DIMACS encoding"""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ import time
 from typing import Callable
 
 from src.config import TEST_REPEATS
+from src.search_policies import *
 
 RESULTS_DIR = "results/"
 CSV_HEADER = "length,encode_time,total_time,sat_time,vars,cls"
@@ -37,113 +38,6 @@ def main() -> None:
         file_path = encode(input_file, goal_contacts, dim, ver, False, use_cached)
         print(f"Encoding bul    : {file_path.replace('.cnf', '.bul')}")
         print(f"Encoding dimacs : {file_path}")
-
-
-def binary_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
-    """Binary search for max contacts"""
-    total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
-    lo, hi = 0, get_max_contacts(get_sequence(seq_file), dim)
-    print(f"Start binary search to max contacts from {hi = }")
-    while lo <= hi:
-        curr = (hi + lo) // 2
-        print(f"Solving {curr}:", end=" ", flush=True)
-        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached, solver)
-        total_encode_time += abs(encode_time)
-        total_solve_time += abs(solve_time)
-        if solve_time > 0:
-            lo = curr + 1
-            sat_solve_time += solve_time
-        else:
-            curr -= 1
-            hi = curr
-    print()
-    return {
-        "max_contacts": curr,
-        "encode_time": total_encode_time,
-        "solve_time": total_solve_time,
-        "sat_solve_time": sat_solve_time
-    }
-
-
-def double_linear_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
-    """Double till UNSAT, then linear search for max contacts"""
-    curr = 1
-    max_contacts = get_max_contacts(get_sequence(seq_file), dim)
-    total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
-    print(f"Start doubling until {max_contacts = }")
-    while curr <= max_contacts:
-        print(f"Solving {curr}: ", end="", flush=True)
-        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached, solver)
-        total_encode_time += abs(encode_time)
-        total_solve_time += abs(solve_time)
-        if solve_time <= 0:
-            break
-        sat_solve_time += solve_time
-        curr *= 2
-    print(f"Failed to solve at {curr}\n")
-
-    curr = curr // 2 - 1
-    print("Start linear search to max contacts")
-    while curr < max_contacts:
-        curr += 1
-        print(f"Solving {curr}:", end=" ", flush=True)
-        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached, solver)
-        total_encode_time += abs(encode_time)
-        total_solve_time += abs(solve_time)
-        if solve_time <= 0:
-            curr -= 1
-            break
-        sat_solve_time += solve_time
-    print()
-    return {
-        "max_contacts": curr,
-        "encode_time": total_encode_time,
-        "solve_time": total_solve_time,
-        "sat_solve_time": sat_solve_time
-    }
-
-
-def double_binary_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
-    """
-    Start the contacts at 1 doubling until unsolvable. Then binary search for the max solvable
-    """
-    curr = 1
-    max_contacts = get_max_contacts(get_sequence(seq_file), dim)
-    total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
-    print(f"Start doubling until {max_contacts = }")
-    while curr <= max_contacts:
-        print(f"Solving {curr}: ", end="", flush=True)
-        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached, solver)
-        total_encode_time += abs(encode_time)
-        total_solve_time += abs(solve_time)
-        if solve_time <= 0:
-            break
-        sat_solve_time += solve_time
-        curr *= 2
-    print(f"Failed to solve at {curr}\n")
-
-    curr -= 1
-    lo, hi = curr // 2 + 1, curr
-    print("Start binary search to max contacts")
-    while lo <= hi:
-        curr = (hi + lo) // 2
-        print(f"Solving {curr}:", end=" ")
-        encode_time, solve_time = solve_sat(seq_file, curr, dim, ver, use_cached, solver)
-        total_encode_time += abs(encode_time)
-        total_solve_time += abs(solve_time)
-        if solve_time > 0:
-            lo = curr + 1
-            sat_solve_time += solve_time
-        else:
-            curr -= 1
-            hi = curr
-    print()
-    return {
-        "max_contacts": curr,
-        "encode_time": total_encode_time,
-        "solve_time": total_solve_time,
-        "sat_solve_time": sat_solve_time
-    }
 
 
 def timed_solve(
