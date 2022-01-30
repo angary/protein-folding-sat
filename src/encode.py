@@ -12,6 +12,7 @@ from src.config import TEST_REPEATS, SOLVERS
 from src.search_policies import *
 
 RESULTS_DIR = "results/"
+BULE_DIR = "bule/"
 CSV_HEADER = "name,len,dim,ver,solver,policy,encode_time,total_time,sat_time,vars,cls"
 
 
@@ -97,7 +98,8 @@ def encode(
     dim: int,
     ver: int,
     tracked: bool,
-    use_cached: bool
+    use_cached: bool,
+    count_encoding: str = "counter.bul"
 ) -> str:
     """Generate bule encoding and write it to a file in the models folder that path"""
     filename = seq_file.split("/")[-1]
@@ -118,7 +120,8 @@ def encode(
         ])
     
     # Generate encoding
-    bule_files = f"{get_encoding_file(dim, ver)} bule/cc_a.bul"
+
+    bule_files = f"{get_encoding_file(dim, ver)} {BULE_DIR}{count_encoding}"
     output = f"models/cnf/{filename}_{dim}d_v{ver}_{goal}c.cnf"
     start = time.time()
     if not use_cached or not os.path.isfile(output):
@@ -137,7 +140,7 @@ def encode(
 
 
 def get_encoding_file(dim: int, v: int) -> str:
-    return f"bule/constraints_v{v}.bul" if v > 0 else f"bule/constraints_{dim}d_v0.bul"
+    return BULE_DIR + "constraints_" f"v{v}.bul" if v > 0 else f"{dim}d_v0.bul"
 
 
 def get_num_vars_and_clauses(filename: str, dim: int, v: int, goal: int) -> tuple[int, int]:

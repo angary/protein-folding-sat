@@ -1,5 +1,4 @@
-
-
+% Counter encoding for linear constraints
 
 cardinality_var[ID,X] :: #ground counter_var[ID,X].
 cardinality_bound[ID,C] :: #ground counter_bound[ID,geq,C].
