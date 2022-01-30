@@ -8,8 +8,14 @@ from src.run_tests import get_sequences
 import os
 from typing import Callable
 
+<<<<<<< HEAD
 from src.encode import encode, get_num_vars_and_clauses, get_max_contacts
 from src.search_policies import *
+=======
+from src.encode import encode, get_num_vars_and_clauses, binary_search_policy, \
+    double_binary_policy, double_linear_policy, get_max_contacts
+from src.run_tests import get_sequences
+>>>>>>> policy-test
 
 MIN_LEN = 13
 MAX_LEN = 25
@@ -22,11 +28,16 @@ SOLVER = "kissat"
 ENCODINGS = [(2, 2)]
 
 # List containing functions of the different search methods to compare
+<<<<<<< HEAD
 FUNCTIONS = [binary_search_policy, linear_search_policy,
              double_binary_policy, double_linear_policy]
+=======
+FUNCTIONS: list[Callable] = [binary_search_policy, double_binary_policy, double_linear_policy]
+>>>>>>> policy-test
 
 # Flag to choose if we compare encodings or methods of search
 COMPARE_ENCODINGS = False
+
 
 
 def main():
@@ -47,6 +58,7 @@ def main():
         goal_contacts = 1
         if COMPARE_ENCODINGS:
             for dim, version in ENCODINGS:
+<<<<<<< HEAD
                 output = encode(filename, goal_contacts, dim,
                                 version, False, USE_CACHED)
                 print(output)
@@ -54,6 +66,12 @@ def main():
                     sequence["filename"], dim, version, goal_contacts)
                 r = double_linear_policy(
                     filename, dim, version, USE_CACHED, SOLVER)
+=======
+                output = encode(filename, goal_contacts, dim, version, False, USE_CACHED)
+                print(output)
+                v, c = get_num_vars_and_clauses(sequence["filename"], dim, version, goal_contacts)
+                r = double_linear_policy(filename, dim, version, USE_CACHED, SOLVER)
+>>>>>>> policy-test
                 results.append({
                     "ver": version,
                     "vars": v,
@@ -63,6 +81,7 @@ def main():
                     "sat_time": round(r["sat_solve_time"], 4),
                     "contacts": r["max_contacts"]
                 })
+<<<<<<< HEAD
             if len(ENCODINGS) > 1:
                 a, b = results[0:2]
                 variable_diff = (b["vars"] - a["vars"]) / a["vars"]
@@ -89,13 +108,36 @@ def main():
                         f"Leq clauses   : {clause_diff <= 0} {clause_diff}\n")
                     f.write(f"Less time     : {time_diff <= 0} {time_diff}\n")
                 f.write("\n")
+=======
+            a, b = results[0:2]
+            variable_diff = (b["vars"] - a["vars"]) / a["vars"]
+            clause_diff = (b["cls"] - a["cls"]) / a["cls"]
+            time_diff = (b["solve_time"] - a["solve_time"]) / a["solve_time"] if min(b["solve_time"], a["solve_time"]) != 0 else 0
+
+            vs.append(b["vars"] - a["vars"])
+            cs.append(b["cls"] - a["cls"])
+            ts.append(b["solve_time"] - a["solve_time"])
+
+            result_str = "\n".join(list(map(str, results)))
+            with open(OUTPUT, "a") as f:
+                f.write(f"{filename = } | Max contacts = {get_max_contacts(sequence['string'], dim)}\n")
+                f.write(f"{result_str}\n")
+                f.write(f"Same contacts : {a['contacts'] == b['contacts']}\n")
+                f.write(f"Leq variables : {variable_diff <= 0} {variable_diff}\n")
+                f.write(f"Leq clauses   : {clause_diff <= 0} {clause_diff}\n")
+                f.write(f"Less time     : {time_diff <= 0} {time_diff}\n\n")
+>>>>>>> policy-test
         else:
             DIMENSION = 2
             VERSION = 2
             for func in FUNCTIONS:
                 r = func(filename, DIMENSION, VERSION, USE_CACHED, SOLVER)
+<<<<<<< HEAD
                 results.append(
                     [func.__name__, r["solve_time"], r["max_contacts"]])
+=======
+                results.append([func.__name__, r["solve_time"], r["max_contacts"]])
+>>>>>>> policy-test
                 times[func.__name__] += r["solve_time"]
             a, b = results[0:2]
             time_diff = (b[1] - a[1]) / a[1] if min(b[1], a[1]) != 0 else 0
