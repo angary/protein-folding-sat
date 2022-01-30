@@ -8,14 +8,12 @@ import subprocess
 from datetime import datetime
 
 import src.encode as encode
-from src.config import TEST_VERSIONS as VERSIONS, SAT_TEST_SEQ
-SOLVERS = ["kissat", "glucose"]
+from src.config import TEST_VERSIONS as VERSIONS, SAT_TEST_SEQ, POLICIES, SOLVERS
 
 
 MAX_LEN = 23
 INPUT_DIR = "./input"
 IGNORE: list[str] = []
-POLICIES = ["binary_search_policy", "double_binary_policy", "double_linear_policy"]
 
 
 def main() -> None:
