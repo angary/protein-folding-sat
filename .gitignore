@@ -156,7 +156,8 @@ models/
 Dataset/
 
 # Ignore results for now
-results/*
-images/*
+results/
+images/
+tex/
 *.csv
 
