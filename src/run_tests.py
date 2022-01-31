@@ -29,13 +29,24 @@ def main() -> None:
         elif args.test_type == "policy":
             run_policy_test(s["filename"], s["seq"], dims)
         elif args.test_type == "solver":
-            print("Not implemented yet")
-            print("Solvers have been compared in the policy test")
+            run_solver_test(s["filename"], s["seq"], dims)
     print("Finished")
 
 
+def run_solver_test(filename: str, seq: str, dims: list[int]) -> None:
+    """
+    For the file, using linear search, run tests using different solvers and 
+    encoding version
+    """
+    input_file = os.path.join(INPUT_DIR, filename)
+    for solver in SOLVERS:
+        for v in VERSIONS:
+            for d in dims:
+                run_test(input_file, seq, v, d, solver, "linear_search_policy", "solver")
+
+
 def run_policy_test(filename: str, seq: str, dims: list[int]) -> None:
-    """For the file run a search using different policies"""
+    """For the file run a search using different policy, solver, encoding versions"""
     input_file = os.path.join(INPUT_DIR, filename)
 
     # Run test with each combination of policy, solver, and version
@@ -52,7 +63,7 @@ def run_encoding_test(filename: str, seq: str, vers: list[int], dims: list[int])
 
     for d in dims:
         for v in vers:
-            run_test(input_file, seq, v, d, "kissat", "double_linear_policy", "encoding")
+            run_test(input_file, seq, v, d, "kissat", "linear_search_policy", "encoding")
 
 
 def run_sat_test(input_file: str, dim: int) -> None:
@@ -74,6 +85,7 @@ def run_sat_test(input_file: str, dim: int) -> None:
         "dim": dim,
         "times": times,
         "binary_search_policy": get_binary_search_policy_searches(0, max_contacts, goal_contacts),
+        "linear_search_policy": [i + 1 for i in range(goal_contacts)],
         "double_linear_policy": get_double_linear_policy_searches(goal_contacts),
         "double_binary_policy": get_double_binary_policy_searches(goal_contacts)
     }

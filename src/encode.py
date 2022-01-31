@@ -8,7 +8,7 @@ import subprocess
 import time
 from typing import Callable
 
-from src.config import TEST_REPEATS, SOLVERS
+from src.config import POLICIES, TEST_REPEATS, SOLVERS
 from src.search_policies import *
 
 RESULTS_DIR = "results/"
@@ -192,8 +192,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "-p", "--policy",
-        nargs="?", type=str, default="double_linear_policy",
-        choices={"binary_search_policy", "linear_search_policy", "double_binary_policy", "double_linear_policy"},
+        nargs="?", type=str, default="linear_search_policy",
+        choices=set(POLICIES),
         help="the search policy used to find the maximum number of contacts"
     )
     parser.add_argument(
