@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import src.encode
 
-def binary_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
+
+def binary_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str, count_encoding: str = None) -> dict[str, float]:
     """Binary search for max contacts"""
     total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
     lo, hi = 0, src.encode.get_max_contacts(
@@ -18,7 +19,7 @@ def binary_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
         curr = (hi + lo) // 2
         print(f"Solving {curr}:", end=" ", flush=True)
         encode_time, solve_time = src.encode.solve_sat(
-            seq_file, curr, dim, ver, use_cached, solver)
+            seq_file, curr, dim, ver, use_cached, solver, count_encoding)
         total_encode_time += abs(encode_time)
         total_solve_time += abs(solve_time)
         sat = solve_time > 0
@@ -37,7 +38,7 @@ def binary_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
     }
 
 
-def linear_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
+def linear_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str, count_encoding: str = None) -> dict[str, float]:
     """Linear search for max contacts"""
     total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
     curr, max_contacts = 1, src.encode.get_max_contacts(
@@ -47,7 +48,7 @@ def linear_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
         curr += 1
         print(f"Solving {curr}:", end=" ", flush=True)
         encode_time, solve_time = src.encode.solve_sat(
-            seq_file, curr, dim, ver, use_cached, solver)
+            seq_file, curr, dim, ver, use_cached, solver, count_encoding)
         total_encode_time += abs(encode_time)
         total_solve_time += abs(solve_time)
         sat = solve_time > 0
@@ -64,7 +65,7 @@ def linear_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
     }
 
 
-def double_binary_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
+def double_binary_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str, count_encoding: str = None) -> dict[str, float]:
     """
     Start the contacts at 1 doubling until unsolvable. Then binary search for the max solvable
     """
@@ -76,7 +77,7 @@ def double_binary_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
     while curr <= max_contacts:
         print(f"Solving {curr}: ", end="", flush=True)
         encode_time, solve_time = src.encode.solve_sat(
-            seq_file, curr, dim, ver, use_cached, solver)
+            seq_file, curr, dim, ver, use_cached, solver, count_encoding)
         total_encode_time += abs(encode_time)
         total_solve_time += abs(solve_time)
         sat = solve_time > 0
@@ -93,7 +94,7 @@ def double_binary_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
         curr = (hi + lo) // 2
         print(f"Solving {curr}:", end=" ")
         encode_time, solve_time = src.encode.solve_sat(
-            seq_file, curr, dim, ver, use_cached, solver)
+            seq_file, curr, dim, ver, use_cached, solver, count_encoding)
         total_encode_time += abs(encode_time)
         total_solve_time += abs(solve_time)
         sat = solve_time > 0
@@ -112,7 +113,7 @@ def double_binary_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
     }
 
 
-def double_linear_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str) -> dict[str, float]:
+def double_linear_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str, count_encoding: str = None) -> dict[str, float]:
     """Double till UNSAT, then linear search for max contacts"""
     curr = 1
     max_contacts = src.encode.get_max_contacts(
@@ -122,7 +123,7 @@ def double_linear_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
     while curr <= max_contacts:
         print(f"Solving {curr}: ", end="", flush=True)
         encode_time, solve_time = src.encode.solve_sat(
-            seq_file, curr, dim, ver, use_cached, solver)
+            seq_file, curr, dim, ver, use_cached, solver, count_encoding)
         total_encode_time += abs(encode_time)
         total_solve_time += abs(solve_time)
         sat = solve_time > 0
@@ -138,7 +139,7 @@ def double_linear_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
         curr += 1
         print(f"Solving {curr}:", end=" ", flush=True)
         encode_time, solve_time = src.encode.solve_sat(
-            seq_file, curr, dim, ver, use_cached, solver)
+            seq_file, curr, dim, ver, use_cached, solver, count_encoding)
         total_encode_time += abs(encode_time)
         total_solve_time += abs(solve_time)
         sat = solve_time > 0

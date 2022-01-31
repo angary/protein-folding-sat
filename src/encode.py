@@ -71,10 +71,10 @@ def timed_solve(
             f.write(f"{string}\n")
 
 
-def solve_sat(seq_file: str, goal: int, dim: int, ver: int, use_cached: bool, solver) -> tuple[float, float]:
+def solve_sat(seq_file: str, goal: int, dim: int, ver: int, use_cached: bool, solver: str, count_encoding: str = None) -> tuple[float, float]:
     """Encode and solve input, then return tuple (encode duration, solve duration)"""
     start = time.time()
-    file_path = encode(seq_file, goal, dim, ver, False, use_cached)
+    file_path = encode(seq_file, goal, dim, ver, False, use_cached, count_encoding)
     print(f"filepath: {file_path}")
     encode_duration = time.time() - start
 
@@ -120,7 +120,6 @@ def encode(
         ])
     
     # Generate encoding
-
     bule_files = f"{get_encoding_file(dim, ver)} {BULE_DIR}{count_encoding}"
     output = f"models/cnf/{filename}_{dim}d_v{ver}_{goal}c.cnf"
     start = time.time()
