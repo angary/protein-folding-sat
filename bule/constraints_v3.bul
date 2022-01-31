@@ -1,13 +1,16 @@
 width[W] :: #ground pos[0 .. W - 1].
 
-sequence[I, B], pos[P], dim[D]           :: #exists[0] y(I, P, D).
-sequence[I, B], dim[D]                   ::  y(I,0,D). 
-sequence[I, B], dim[D], pos[P], pos[P-1] :: ~y(I, P, D) | y(I, P-1, D).
+sequence[I, _], pos[P], dim[D]           :: #exists[0] y(I, P, D).
+%sequence[I, _], pos[P], dim[D]           :: #hide ~y(I, P, D), y(I,P,D). 
+sequence[I, _], dim[D]                   ::  y(I,0,D). 
+sequence[I, _], dim[D], pos[P], pos[P-1] :: ~y(I, P, D) | y(I, P-1, D).
+
+sequence[I, _], pos[P], dim[D]           :: #exists[0] x(I, P, D).
+sequence[I, _], dim[D], pos[P] 		  	 :: ~y(I, P, D) | pos[P+1] : y(I, P+1, D) | x(I,P,D). 
+sequence[I, _], dim[D], pos[P] 		  	 :: ~x(I,P,D) |  y(I,P,D). 
+sequence[I, _], dim[D], pos[P], pos[P+1] :: ~x(I,P,D) | ~y(I,P+1,D). 
 
 sequence[I,_], sequence[J,_], I<J 		 :: #ground diff[I,J]. 
-% never two characters in same position in all dimensions
-diff[I,J], pos[P] 						 :: dim[D] : ~y(I,P,D) | pos[P+1], dim[D] : y(J,P+1,D).
-
 
 sequence[I,1], sequence[J,1], J-I#mod2==1, I+2<J :: #ground pc[I,J].
 diff[I,I+1] :: #ground adjPc[I,I+1]. 
@@ -15,21 +18,27 @@ pc[I,J]     :: #ground adjPc[I,J].
 adjPc[I,J] 	:: #ground rot[I,J,I,J], rot[I,J,J,I].
 
 % I and J in same position 
-adjPc[I,J], dim[D] :: #exists[0] same(I,J,D). 
+diff[I,J], dim[D] :: #exists[0] same(I,J,D). 
 % I is within [+1,0,+1] of J 
 pc[I,J], dim[D]    :: #exists[0] near(I,J,D). 
 
+% never two characters in same position in all dimensions
+diff[I,J] :: dim[D] : ~same(I,J,D).
+
 %def of same
-rot[I,J,A,B], dim[D], pos[P]           :: ~same(I,J,D) | ~y(A,P,D) | y(B,P,D).
-diff[I,I+1]                            :: dim[D] : ~same(I,I+1,D).
+diff[I,J], dim[D], pos[P]     :: ~x(I,P,D) | ~x(J,P,D) | same(I,J,D).
+rot[I,J,A,B], dim[D], pos[P]  :: ~same(I,J,D) | ~y(A,P,D) | y(B,P,D).
+diff[I,J]                     :: dim[D] : ~same(I,J,D).
+
 %def of near and always needs to hold for adj characters
 rot[I,J,A,B], dim[D], pos[P], pos[P-1] :: pc[I,J] : ~near(I,J,D) | ~y(A,P,D) | y(B,P-1,D).
 %to count potential contacts
 pc[I,J]  						       :: #exists[0] var(contact(I, J)).
 %contact if near 
-pc[I,J], dim[D]                        :: ~var(contact(I,J)) | near(I, J, D).
+pc[I,J], dim[D]                     :: ~var(contact(I,J)) | near(I, J, D).
+
 %contact if is same in at least 1 dimensions for 2D, and in at least 2 for 3D. needs to hold for adj. 
-% adjPc[I,J], dim[D1], dim[D2], D1<D2    :: pc[I,J] : ~var(contact(I,J)) | same(I,J,D1) | same(I,J,D2).
+adjPc[I,J], dim[D1], dim[D2], D1<D2    :: pc[I,J] : ~var(contact(I,J)) | same(I,J,D1) | same(I,J,D2).
 
 % Counting Potential Contacts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
