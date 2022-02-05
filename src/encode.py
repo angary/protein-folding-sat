@@ -102,6 +102,8 @@ def encode(
     count_encoding: str = "counter.bul"
 ) -> str:
     """Generate bule encoding and write it to a file in the models folder that path"""
+    if count_encoding == None:
+        count_encoding = "counter.bul"
     filename = seq_file.split("/")[-1]
     seq = get_sequence(seq_file)
     w = get_grid_diameter(dim, len(seq))
@@ -120,7 +122,7 @@ def encode(
         ])
     
     # Generate encoding
-    bule_files = f"{get_encoding_file(dim, ver)} {BULE_DIR}{count_encoding}"
+    bule_files = f"{get_encoding_file(dim, ver)} {BULE_DIR + count_encoding}"
     output = f"models/cnf/{filename}_{dim}d_v{ver}_{goal}c.cnf"
     start = time.time()
     if not use_cached or not os.path.isfile(output):

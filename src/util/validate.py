@@ -13,14 +13,14 @@ DEFAULT_DIMENSION = 2
 DEFAULT_VERSION = 2
 DEFAULT_SOLVER = "kissat"
 
-MIN_LEN, MAX_LEN = 17, 25
+MIN_LEN, MAX_LEN = 13, 25
 
 INPUT_DIR = "input"
 OUTPUT = "validate.log"
 USE_CACHED = False
 
 # List containing tuple of [dimension, version] of the encodings to compare
-ENCODINGS = [(2, 2)]
+ENCODINGS = [(3, 2), (3, 3)]
 
 # List containing functions of the different search methods to compare
 FUNCTIONS = [binary_search_policy, linear_search_policy,
@@ -30,7 +30,7 @@ COUNT_ENCODINGS = ["cc_a.bul", "counter.bul"]
 
 # Flag to choose if we compare encodings or methods of search
 # {"encoding", "policy", "counting"}
-COMPARISON = "counting"
+COMPARISON = "encoding"
 
 def main():
     with open(OUTPUT, "w+") as f:
@@ -60,7 +60,7 @@ def compare_encodings():
             v, c = get_num_vars_and_clauses(
                 sequence["filename"], dim, version, goal_contacts)
             r = linear_search_policy(
-                filename, dim, version, USE_CACHED, DEFAULT_SOLVER)
+                filename, dim, version, USE_CACHED, DEFAULT_SOLVER, "counter.bul")
             results.append({
                 "ver": version,
                 "vars": v,

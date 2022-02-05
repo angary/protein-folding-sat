@@ -3,13 +3,13 @@ Module containing the different search policies to find the maximum number
 of contacts
 """
 
-
 from __future__ import annotations
 
 import src.encode
 
 
-def binary_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str, count_encoding: str = None) -> dict[str, float]:
+def binary_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, 
+        solver: str, count_encoding: str = None) -> dict[str, float]:
     """Binary search for max contacts"""
     total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
     lo, hi = 0, src.encode.get_max_contacts(
@@ -38,7 +38,8 @@ def binary_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
     }
 
 
-def linear_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str, count_encoding: str = None) -> dict[str, float]:
+def linear_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, 
+        solver: str, count_encoding: str = None) -> dict[str, float]:
     """Linear search for max contacts"""
     total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
     curr, max_contacts = 1, src.encode.get_max_contacts(
@@ -65,7 +66,8 @@ def linear_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
     }
 
 
-def double_binary_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str, count_encoding: str = None) -> dict[str, float]:
+def double_binary_policy(seq_file: str, dim: int, ver: int, use_cached: bool, 
+        solver: str, count_encoding: str = None) -> dict[str, float]:
     """
     Start the contacts at 1 doubling until unsolvable. Then binary search for the max solvable
     """
@@ -113,7 +115,8 @@ def double_binary_policy(seq_file: str, dim: int, ver: int, use_cached: bool, so
     }
 
 
-def double_linear_policy(seq_file: str, dim: int, ver: int, use_cached: bool, solver: str, count_encoding: str = None) -> dict[str, float]:
+def double_linear_policy(seq_file: str, dim: int, ver: int, use_cached: bool, 
+        solver: str, count_encoding: str = None) -> dict[str, float]:
     """Double till UNSAT, then linear search for max contacts"""
     curr = 1
     max_contacts = src.encode.get_max_contacts(
