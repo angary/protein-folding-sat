@@ -8,6 +8,7 @@ import subprocess
 from datetime import datetime
 
 import src.encode as encode
+import src.search_policies as search_policies
 from src.config import TEST_VERSIONS as VERSIONS, SAT_TEST_SEQ, POLICIES, SOLVERS
 
 
@@ -30,7 +31,26 @@ def main() -> None:
             run_policy_test(s["filename"], s["seq"], dims)
         elif args.test_type == "solver":
             run_solver_test(s["filename"], s["seq"], dims)
+        elif args.test_type == "generate":
+            generate_encodings(s["filename"], s["seq"], vers, dims)
     print("Finished")
+
+
+def generate_encodings(filename: str, seq: str, vers: list[int], dims: list[int]) -> None:
+    """
+    Generated required encoding files for a sequence assuming a linear search policy
+    """
+    input_file = os.path.join(INPUT_DIR, filename)
+    for d in dims:
+        # Run the encoding using the first version
+        r = search_policies.linear_search_policy(input_file, d, vers[-1], True, "kissat")
+        max_contacts = r["max_contacts"]
+
+        # Run the encoding for the other versions
+        for ver in vers[:-1]:
+            for i in range(1, max_contacts + 1):
+                output = encode.encode(input_file, i, d, ver, False, True)
+                print(f"encoding: {output}")
 
 
 def run_solver_test(filename: str, seq: str, dims: list[int]) -> None:
@@ -125,7 +145,7 @@ def get_double_binary_policy_searches(goal: int) -> list[int]:
     return searches + get_binary_search_policy_searches(i // 2, i, goal)
 
 
-def run_test(input_file: str, seq: str, v: int, d: int, solver: str, policy: str, dir: str) -> None:
+def run_test(input_file: str, seq: str, v: int, d: int, solver: str, policy: str, dir: str, generate: bool = False) -> None:
     
     curr_time = datetime.now().strftime("%H:%M:%S")
     print(f"Testing {input_file}: \t{seq} \tv: {v} \td: {d} {curr_time}")
@@ -133,7 +153,8 @@ def run_test(input_file: str, seq: str, v: int, d: int, solver: str, policy: str
     solve = "" if d == 3 and len(seq) >= 13 and v == 0 else "-s"
 
     command = f"python3 -m src.encode {input_file}"
-    options = f"{solve} -t -u -v {v} -d {d} -p {policy} --solver {solver} -r {dir}"
+    track = "-t" if generate else ""
+    options = f"{solve} {track} -u -v {v} -d {d} -p {policy} --solver {solver} -r {dir}"
     subprocess.run((command + " " + options).split(), capture_output=False)
 
 
@@ -194,8 +215,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "-t", "--test-type",
-        nargs="?", type=str, default="encoding", choices={"encoding", "policy", "sat", "solver"},
-        help="which independent variable to test"
+        nargs="?", type=str, default="encoding", choices={"encoding", "generate", "policy", "sat", "solver"},
+        help="which independent variable to test, or to generate encodings"
     )
     parser.add_argument(
         "-v", "--version",

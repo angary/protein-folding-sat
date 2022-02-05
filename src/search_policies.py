@@ -42,7 +42,7 @@ def linear_search_policy(seq_file: str, dim: int, ver: int, use_cached: bool,
         solver: str, count_encoding: str = None) -> dict[str, float]:
     """Linear search for max contacts"""
     total_encode_time, total_solve_time, sat_solve_time = 0.0, 0.0, 0.0
-    curr, max_contacts = 1, src.encode.get_max_contacts(
+    curr, max_contacts = 0, src.encode.get_max_contacts(
         src.encode.get_sequence(seq_file), dim)
     print(f"Start linear search to max contacts: {max_contacts}")
     while curr < max_contacts:

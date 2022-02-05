@@ -141,7 +141,7 @@ def encode(
 
 
 def get_encoding_file(dim: int, v: int) -> str:
-    return BULE_DIR + "constraints_" f"v{v}.bul" if v > 0 else f"{dim}d_v0.bul"
+    return BULE_DIR + "constraints_" + (f"v{v}.bul" if v > 0 else f"{dim}d_v0.bul")
 
 
 def get_num_vars_and_clauses(filename: str, dim: int, v: int, goal: int) -> tuple[int, int]:
