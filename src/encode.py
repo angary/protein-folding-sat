@@ -107,7 +107,7 @@ def encode(
     filename = seq_file.split("/")[-1]
     seq = get_sequence(seq_file)
     w = get_grid_diameter(dim, len(seq))
-    in_file = f"models/bul/{filename}_d{dim}_v{ver}_{goal}c.bul"
+    in_file = f"models/bul/{filename}_{dim}d_v{ver}_{goal}c.bul"
 
     # Number of contacts = adjacent "1"s minus offset
     with open(in_file, "w+") as f:

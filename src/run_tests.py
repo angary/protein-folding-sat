@@ -43,13 +43,13 @@ def generate_encodings(filename: str, seq: str, vers: list[int], dims: list[int]
     input_file = os.path.join(INPUT_DIR, filename)
     for d in dims:
         # Run the encoding using the first version
-        r = search_policies.linear_search_policy(input_file, d, vers[-1], True, "kissat")
+        r = search_policies.linear_search_policy(input_file, d, vers[-1], False, "kissat")
         max_contacts = r["max_contacts"]
 
         # Run the encoding for the other versions
         for ver in vers[:-1]:
             for i in range(1, max_contacts + 1):
-                output = encode.encode(input_file, i, d, ver, False, True)
+                output = encode.encode(input_file, i, d, ver, False, False)
                 print(f"encoding: {output}")
 
 
