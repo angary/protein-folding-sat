@@ -175,7 +175,7 @@ def get_sequences(
     sequences = [s for s in sequences if len(s["seq"]) >= min_len and len(s["seq"]) < max_len]
 
     # Filter by min sequence name
-    if min_sequence != "":
+    if min_sequence:
         sequences = [s for s in sequences if s["filename"] >= min_sequence]
 
     return sorted(sequences, key=lambda x: (len(x["seq"]), x["filename"]))
@@ -210,7 +210,8 @@ def parse_args() -> argparse.Namespace:
         "--min-len",
         nargs="?", type=int, default=0,
         help="the minimum length sequence to test"
-    ).add_argument(
+    )
+    parser.add_argument(
         "--min-sequence",
         nargs="?", type=str,
         help="the sequence to start solving from"
