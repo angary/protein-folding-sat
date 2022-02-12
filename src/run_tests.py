@@ -12,7 +12,7 @@ import src.search_policies as search_policies
 from src.config import TEST_VERSIONS as VERSIONS, SAT_TEST_SEQ, POLICIES, SOLVERS
 
 
-MAX_LEN = 23
+MAX_LEN = 27
 INPUT_DIR = "./input"
 IGNORE: list[str] = []
 
@@ -23,7 +23,7 @@ def main() -> None:
     if args.test_type == "sat":
         run_sat_test(SAT_TEST_SEQ, 2)
         return print("Finished")
-    for s in get_sequences(INPUT_DIR, args.sequence_type, args.min_len, MAX_LEN):
+    for s in get_sequences(INPUT_DIR, args.sequence_type, args.min_len, args.min_sequence, MAX_LEN):
         print(s)
         if args.test_type == "encoding":
             run_encoding_test(s["filename"], s["seq"], vers, dims)
@@ -162,6 +162,7 @@ def get_sequences(
     input_dir_name: str,
     seq_type: str,
     min_len: int = 0,
+    min_sequence: str = "",
     max_len: int = 100
 ) -> list[dict[str, str]]:
     """Get list of dicts of sequences and their filename from the input dir"""
@@ -169,12 +170,15 @@ def get_sequences(
     for filename in os.listdir(input_dir_name):
         if filename in IGNORE or not is_type(filename, seq_type):
             continue
-
-        filepath = os.path.join(input_dir_name, filename)
-        with open(filepath) as f:
-            sequences.append({"filename": filename, "seq": get_sequence(filename)})
+        sequences.append({"filename": filename, "seq": get_sequence(filename)})
+    
     # Sort sequence by shortest sequence first
     sequences = [s for s in sequences if len(s["seq"]) >= min_len and len(s["seq"]) < max_len]
+
+    # Filter by min sequence name
+    if min_sequence != "":
+        sequences = [s for s in sequences if s["filename"] >= min_sequence]
+
     return sorted(sequences, key=lambda x: (len(x["seq"]), x["filename"]))
 
 
@@ -204,9 +208,13 @@ def parse_args() -> argparse.Namespace:
         help="the dimension of the embedding grid, default: 2d and 3d"
     )
     parser.add_argument(
-        "-m", "--min-len",
+        "--min-len",
         nargs="?", type=int, default=0,
         help="the minimum length sequence to test"
+    ).add_argument(
+        "--min-sequence",
+        nargs="?", type=str,
+        help="the sequence to start solving from"
     )
     parser.add_argument(
         "-s", "--sequence-type",
