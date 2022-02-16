@@ -26,11 +26,15 @@ def main() -> None:
     use_cached = args.use_cached
     policy = eval(args.policy)
     solver = args.solver
-    if args.solve and args.track:
-        print("Attempting to solve and time\n")
-        global RESULTS_DIR
-        RESULTS_DIR = os.path.join(RESULTS_DIR, args.results_dir)
-        timed_solve(input_file, dim, ver, policy, use_cached, solver)
+    if args.track:
+        if args.solve:
+            print("Attempting to solve and time\n")
+            global RESULTS_DIR
+            RESULTS_DIR = os.path.join(RESULTS_DIR, args.results_dir)
+            timed_solve(input_file, dim, ver, policy, use_cached, solver)
+        else:
+            print("Attempting to track number of encodings")
+            encode(input_file, 0, dim, ver, True, True)
     elif args.solve:
         print("Attempting to solve\n")
         print(f"Max contacts: {policy(input_file, dim, ver, use_cached, solver)}")
