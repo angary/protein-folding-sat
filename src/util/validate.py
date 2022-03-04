@@ -13,14 +13,14 @@ DEFAULT_DIMENSION = 2
 DEFAULT_VERSION = 2
 DEFAULT_SOLVER = "kissat"
 
-MIN_LEN, MAX_LEN = 10, 25
+MIN_LEN, MAX_LEN = 18, 25
 
 INPUT_DIR = "input"
 OUTPUT = "validate.log"
 USE_CACHED = False
 
 # List containing tuple of [dimension, version] of the encodings to compare
-ENCODINGS = [(3, 1), (3, 3)]
+ENCODINGS = [(2, 1), (2, 4)]
 
 # List containing functions of the different search methods to compare
 FUNCTIONS = [binary_search_policy, linear_search_policy,
