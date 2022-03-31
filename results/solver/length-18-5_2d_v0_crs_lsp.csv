@@ -1,0 +1,2 @@
+name,len,dim,ver,solver,policy,encode_time,total_time,sat_time,vars,cls
+length-18-5,18,2,0,cryptominisat,linear_search_policy,0.0711967945098877,5.68491530418396,0.7014529705047607,993,11990

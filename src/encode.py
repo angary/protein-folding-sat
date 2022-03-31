@@ -27,14 +27,14 @@ def main() -> None:
     policy = eval(args.policy)
     solver = args.solver
     if args.track:
+        global RESULTS_DIR
+        RESULTS_DIR = os.path.join(RESULTS_DIR, args.results_dir)
         if args.solve:
             print("Attempting to solve and time\n")
-            global RESULTS_DIR
-            RESULTS_DIR = os.path.join(RESULTS_DIR, args.results_dir)
             timed_solve(input_file, dim, ver, policy, use_cached, solver)
         else:
-            print("Attempting to track number of encodings")
-            encode(input_file, 0, dim, ver, True, True)
+            print("Attempting to track number of clauses and variables")
+            encode(input_file, 1, dim, ver, True, True)
     elif args.solve:
         print("Attempting to solve\n")
         print(f"Max contacts: {policy(input_file, dim, ver, use_cached, solver)}")
@@ -61,8 +61,8 @@ def timed_solve(
     result_name = f"{filename}_{dim}d_v{ver}_{solver[:2]}s_{search_initials}"
     results_file = f"{os.path.join(RESULTS_DIR, result_name)}.csv"
 
-    with open(results_file, "w+") as f:
-        f.write(f"{CSV_HEADER}\n")
+    # Run the test multiple times and store results in results_list
+    results_list = []
     for _ in range(TEST_REPEATS):
         print(policy.__name__)
         r = policy(seq_file, dim, ver, use_cached, solver)
@@ -71,7 +71,12 @@ def timed_solve(
         print(results_file)
         results = [filename,length,dim,ver,solver,pol_name,r["encode_time"],r["solve_time"],r["sat_solve_time"],v,c]
         string = ",".join(list(map(str, results)))
-        with open(results_file, "a") as f:
+        results_list.append(string)
+
+    # Write results in csv file
+    with open(results_file, "w+") as f:
+        f.write(f"{CSV_HEADER}\n")
+        for string in results_list:
             f.write(f"{string}\n")
 
 
@@ -129,7 +134,7 @@ def encode(
     bule_files = f"{get_encoding_file(dim, ver)} {BULE_DIR + count_encoding}"
     output = f"models/cnf/{filename}_{dim}d_v{ver}_{goal}c.cnf"
     start = time.time()
-    if not use_cached or not os.path.isfile(output):
+    if not use_cached or not os.path.isfile(output) or os.path.getsize(output) == 0:
         subprocess.run(f"bule2 --output dimacs {bule_files} {in_file} > {output}", shell=True)
         encode_time = time.time() - start
     else:
@@ -140,7 +145,7 @@ def encode(
         with open(f"{os.path.join(RESULTS_DIR, result_name)}.csv", "w+") as f:
             vars, cls = get_num_vars_and_clauses(filename, dim, ver, goal)
             f.write(f"{CSV_HEADER}\n")
-            f.write(f"{filename},{len(seq)},{dim},{ver},NA,NA,{encode_time},0,0,0,{vars},{cls}")
+            f.write(f"{filename},{len(seq)},{dim},{ver},NA,NA,{encode_time},0,0,{vars},{cls}")
     return output
 
 
@@ -149,8 +154,13 @@ def get_encoding_file(dim: int, v: int) -> str:
 
 
 def get_num_vars_and_clauses(filename: str, dim: int, v: int, goal: int) -> tuple[int, int]:
-    with open(f"models/cnf/{filename}_{dim}d_v{v}_{goal}c.cnf", "r") as f:
-        return tuple(map(int, f.readline().split()[-2:]))
+    cnf_filename = f"models/cnf/{filename}_{dim}d_v{v}_{goal}c.cnf"
+    with open(cnf_filename, "r") as f:
+        line = f.readline().split()
+        if not line:
+            print(f"Could not find {cnf_filename}")
+            return
+        return tuple(map(int, line[-2:]))
 
 
 def get_sequence(seq_file: str) -> str:

@@ -1,0 +1,2 @@
+name,len,dim,ver,solver,policy,encode_time,total_time,sat_time,vars,cls
+length-17-6,17,2,3,maplesat,linear_search_policy,0.03239083290100098,6.214312791824341,0.5905225276947021,953,5004

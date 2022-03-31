@@ -146,11 +146,10 @@ def get_double_binary_policy_searches(goal: int) -> list[int]:
 
 
 def run_test(input_file: str, seq: str, v: int, d: int, solver: str, policy: str, dir: str) -> None:
-    
     curr_time = datetime.now().strftime("%H:%M:%S")
     print(f"Testing {input_file}: \t{seq} \tv: {v} \td: {d} {curr_time}")
     # We do not solve using the old encoding if 3D and len > 13
-    solve = "" if d == 3 and len(seq) >= 13 and v == 0 else "-s"
+    solve = "" if d == 3 and len(seq) >= 14 and v == 0 else "-s"
 
     command = f"python3 -m src.encode {input_file}"
     options = f"{solve} -t -u -v {v} -d {d} -p {policy} --solver {solver} -r {dir}"

@@ -1,0 +1,2 @@
+name,len,dim,ver,solver,policy,encode_time,total_time,sat_time,vars,cls
+length-20-10,20,2,1,cadical,linear_search_policy,0.055141448974609375,268.80705404281616,1.754138708114624,1371,12572

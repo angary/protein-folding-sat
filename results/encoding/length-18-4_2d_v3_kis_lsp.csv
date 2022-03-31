@@ -1,0 +1,2 @@
+name,len,dim,ver,solver,policy,encode_time,total_time,sat_time,vars,cls
+length-18-4,18,2,3,kissat,linear_search_policy,0.04360556602478027,11.016407012939453,1.995908498764038,1049,5501

@@ -1,0 +1,2 @@
+name,len,dim,ver,solver,policy,encode_time,total_time,sat_time,vars,cls
+length-15-2,15,2,2,glucose,linear_search_policy,0.0259702205657959,2.4853355884552,0.7044072151184082,587,3878
