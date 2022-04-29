@@ -19,7 +19,7 @@ def main():
             f.write(f"#ground cardinality_bound[0, {max(1, i - 2)}].\n")
             f.seek(0)
             # Calculate the number of clauses
-            cmd = f"bule2 --output dimacs {f.name} {BULE_FILE} | grep 'p cnf' | cut -d ' ' -f 3-4"
+            cmd = f"bule --output dimacs {f.name} {BULE_FILE} | grep 'p cnf' | cut -d ' ' -f 3-4"
             p = subprocess.run(cmd, capture_output=True, shell=True)
             output = p.stdout.decode().rstrip("\n").replace(" ", ",")
             results.append(f"{i},{output}\n")

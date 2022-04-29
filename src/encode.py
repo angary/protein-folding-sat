@@ -135,7 +135,7 @@ def encode(
     output = f"models/cnf/{filename}_{dim}d_v{ver}_{goal}c.cnf"
     start = time.time()
     if not use_cached or not os.path.isfile(output) or os.path.getsize(output) == 0:
-        subprocess.run(f"bule2 --output dimacs {bule_files} {in_file} > {output}", shell=True)
+        subprocess.run(f"bule --output dimacs {bule_files} {in_file} > {output}", shell=True)
         encode_time = time.time() - start
     else:
         encode_time = 0

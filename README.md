@@ -39,7 +39,7 @@ The objective of this project is to examine the HP Model of protein folding unde
     </tr>
     <tr>
       <td><b>models</b></td>
-      <td>Folder containing the Bule2 and DIMACS CNF format encoding of the inputs</td>
+      <td>Folder containing the Bule and DIMACS CNF format encoding of the inputs</td>
     </tr>
     <tr>
       <td><b>src</b></td>
@@ -48,7 +48,7 @@ The objective of this project is to examine the HP Model of protein folding unde
          <ul>
             <li>The <b>util</b> folder contains helper scripts used for comparing encodings, or visualising embeddings</li>
             <ul>
-              <li>To visualise a grid, run <code>bule2 --solve &lt;model> &lt;constraints> 2> temp.bul; python3 -m src.util.visualise_grid temp.bul</code>
+              <li>To visualise a grid, run <code>bule --solve &lt;model> &lt;constraints> 2> temp.bul; python3 -m src.util.visualise_grid temp.bul</code>
             </ul>
          </ul>
       </td>

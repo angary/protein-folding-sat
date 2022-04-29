@@ -8,13 +8,21 @@ echo
 
 
 echo "Checking SAT solvers"
-declare -a solvers=("cadical" "cryptominisat" "glucose" "kissat" "maplesat")
+declare -A solvers=(
+    ["cadical"]="https://github.com/arminbiere/cadical"
+    ["cryptominisat"]="https://github.com/msoos/cryptominisat"
+    ["glucose"]="https://github.com/mi-ki/glucose-syrup"
+    ["kissat"]="https://github.com/arminbiere/kissat"
+    ["maplesat"]="https://bitbucket.org/JLiangWaterloo/maplesat/src"
+)
+
 passed=0
-for i in "${solvers[@]}"
+for i in "${!solvers[@]}"
 do
     if ! command -v ${i} &> /dev/null
     then
         echo "WARNING: ${i} could not be found"
+        echo "         Install at ${solvers[$i]}"
         passed=1
     fi
 done
@@ -28,11 +36,11 @@ echo
 
 
 echo "Checking bule installation"
-if ! command -v bule2 &> /dev/null
+if ! command -v bule &> /dev/null
 then
-    echo "Could not find bule2, install bule at https://github.com/vale1410/bule"
+    echo "Could not find bule, install bule at https://github.com/vale1410/bule"
 else
-    echo "bule2 installed"
+    echo "bule installed"
 fi
 echo
 
